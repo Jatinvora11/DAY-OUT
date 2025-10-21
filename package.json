@@ -1,0 +1,20 @@
+{
+  "name": "dayout-mern-root",
+  "version": "1.0.0",
+  "description": "DayOut MERN Stack Application - Root Package",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "build": "cd frontend && npm run build"
+  },
+  "keywords": ["mern", "travel", "itinerary", "ai", "gemini"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

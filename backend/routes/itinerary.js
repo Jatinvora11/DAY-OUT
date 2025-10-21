@@ -1,0 +1,170 @@
+import express from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { body, validationResult } from 'express-validator';
+import { protect } from '../middleware/auth.js';
+import Itinerary from '../models/Itinerary.js';
+
+const router = express.Router();
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// @route   POST /api/itinerary/generate
+// @desc    Generate itinerary using Gemini AI
+// @access  Private
+router.post(
+  '/generate',
+  [
+    protect,
+    body('location').trim().notEmpty().withMessage('Location is required'),
+    body('startDate').isDate().withMessage('Valid start date is required'),
+    body('endDate').isDate().withMessage('Valid end date is required'),
+    body('adults').isInt({ min: 1 }).withMessage('At least 1 adult is required'),
+    body('children').isInt({ min: 0 }).withMessage('Children count must be 0 or more'),
+    body('budget').isInt({ min: 0 }).withMessage('Budget must be 0 or more'),
+    body('tripType').isIn(['leisure', 'adventure', 'cultural', 'business']).withMessage('Invalid trip type')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { location, startDate, endDate, adults, children, budget, tripType, specialRequests } = req.body;
+
+    try {
+      const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with an average budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
+
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const itineraryText = response.text();
+
+      res.json({
+        itinerary: itineraryText,
+        details: {
+          location,
+          startDate,
+          endDate,
+          adults,
+          children,
+          budget,
+          tripType,
+          specialRequests
+        }
+      });
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      res.status(500).json({ message: 'Failed to generate itinerary', error: error.message });
+    }
+  }
+);
+
+// @route   POST /api/itinerary/save
+// @desc    Save itinerary to database
+// @access  Private
+router.post(
+  '/save',
+  [
+    protect,
+    body('location').trim().notEmpty().withMessage('Location is required'),
+    body('startDate').isDate().withMessage('Valid start date is required'),
+    body('endDate').isDate().withMessage('Valid end date is required'),
+    body('itineraryText').trim().notEmpty().withMessage('Itinerary text is required')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { location, startDate, endDate, adults, children, budget, tripType, specialRequests, itineraryText } = req.body;
+
+    try {
+      const itinerary = await Itinerary.create({
+        user: req.user._id,
+        location,
+        startDate,
+        endDate,
+        adults,
+        children,
+        budget,
+        tripType,
+        specialRequests,
+        itineraryText
+      });
+
+      res.status(201).json({
+        message: 'Itinerary saved successfully',
+        itinerary
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Failed to save itinerary', error: error.message });
+    }
+  }
+);
+
+// @route   GET /api/itinerary/user
+// @desc    Get all itineraries for logged-in user
+// @access  Private
+router.get('/user', protect, async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+    res.json(itineraries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch itineraries', error: error.message });
+  }
+});
+
+// @route   GET /api/itinerary/:id
+// @desc    Get single itinerary by ID
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found' });
+    }
+
+    // Check if itinerary belongs to logged-in user
+    if (itinerary.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to access this itinerary' });
+    }
+
+    res.json(itinerary);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch itinerary', error: error.message });
+  }
+});
+
+// @route   DELETE /api/itinerary/:id
+// @desc    Delete itinerary
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found' });
+    }
+
+    // Check if itinerary belongs to logged-in user
+    if (itinerary.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this itinerary' });
+    }
+
+    await itinerary.deleteOne();
+
+    res.json({ message: 'Itinerary deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete itinerary', error: error.message });
+  }
+});
+
+export default router;
