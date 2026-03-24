@@ -4,13 +4,13 @@ import './About.css';
 const About = () => {
   return (
     <div className="about-container fade-in">
-      <div className="about-hero">
+      <div className="about-hero reveal">
         <h1 className="hero-title">About DayOut</h1>
         <p className="hero-subtitle">Your AI-Powered Travel Companion</p>
       </div>
 
       <div className="about-content">
-        <section className="about-section">
+        <section className="about-section reveal">
           <h2>Our Mission</h2>
           <p>
             At DayOut, we believe that planning your perfect trip should be as exciting as the journey itself. 
@@ -19,7 +19,7 @@ const About = () => {
           </p>
         </section>
 
-        <section className="about-section">
+        <section className="about-section reveal">
           <h2>What We Do</h2>
           <p>
             DayOut uses advanced AI technology to create customized travel itineraries tailored to your unique 
@@ -28,7 +28,7 @@ const About = () => {
           </p>
         </section>
 
-        <section className="about-section">
+        <section className="about-section reveal">
           <h2>How It Works</h2>
           <div className="features-grid">
             <div className="feature-item">
@@ -49,7 +49,7 @@ const About = () => {
           </div>
         </section>
 
-        <section className="about-section">
+        <section className="about-section reveal">
           <h2>Why Choose DayOut?</h2>
           <ul className="benefits-list">
             <li>✨ Personalized itineraries powered by AI</li>
@@ -61,7 +61,7 @@ const About = () => {
           </ul>
         </section>
 
-        <section className="about-section cta-section">
+        <section className="about-section cta-section reveal">
           <h2>Start Planning Your Next Adventure</h2>
           <p>Join thousands of travelers who trust DayOut for their travel planning needs.</p>
         </section>

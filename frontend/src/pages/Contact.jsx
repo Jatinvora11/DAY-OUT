@@ -38,7 +38,7 @@ const Contact = () => {
 
   return (
     <div className="contact-container fade-in">
-      <div className="contact-card">
+      <div className="contact-card reveal">
         <h2 className="contact-title">Contact Us</h2>
 
         {error && <div className="alert alert-error">{error}</div>}

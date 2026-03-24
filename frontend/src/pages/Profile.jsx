@@ -9,6 +9,7 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [theme, setTheme] = useState('coastal');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -25,6 +26,19 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
+    setTheme(storedTheme);
+    document.documentElement.setAttribute('data-theme', storedTheme);
+  }, []);
+
+  const handleThemeChange = (event) => {
+    const nextTheme = event.target.value;
+    setTheme(nextTheme);
+    localStorage.setItem('dayout-theme', nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -39,7 +53,7 @@ const Profile = () => {
 
   return (
     <div className="profile-container fade-in">
-      <div className="profile-card">
+      <div className="profile-card reveal">
         <div className="profile-header">
           <h2 className="profile-title">Profile</h2>
         </div>
@@ -61,6 +75,20 @@ const Profile = () => {
                 month: 'long', 
                 day: 'numeric' 
               })}</span>
+            </div>
+            <div className="profile-detail profile-theme">
+              <strong>Theme Preference:</strong>
+              <select
+                id="profile-theme"
+                value={theme}
+                onChange={handleThemeChange}
+                className="form-input"
+              >
+                <option value="coastal">Coastal Voyage</option>
+                <option value="desert">Sunrise Desert</option>
+                <option value="forest">Forest Trek</option>
+                <option value="atlas">City Atlas</option>
+              </select>
             </div>
           </div>
         )}

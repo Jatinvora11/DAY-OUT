@@ -7,19 +7,21 @@
 }
 
 .auth-card {
-  background-color: #fff;
+  background-color: var(--surface);
   padding: 40px;
   max-width: 500px;
   width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(15, 31, 46, 0.06);
 }
 
 .auth-title {
-  color: var(--powder-blue);
+  color: var(--accent-2);
   text-align: center;
   margin-bottom: 30px;
   font-size: 2rem;
+  font-family: var(--font-display);
 }
 
 .auth-form {
@@ -35,17 +37,17 @@
 .auth-link {
   text-align: center;
   margin-top: 20px;
-  color: var(--black);
+  color: var(--text);
 }
 
 .auth-link a {
-  color: var(--powder-blue);
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
 }
 
 .auth-link a:hover {
-  color: var(--lilac);
+  color: var(--accent-2);
   text-decoration: underline;
 }
 

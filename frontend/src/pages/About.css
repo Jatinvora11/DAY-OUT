@@ -5,7 +5,9 @@
 }
 
 .about-hero {
-  background: linear-gradient(135deg, var(--lilac) 0%, var(--pink) 100%);
+  background: var(--hero-gradient);
+  background-size: 200% 200%;
+  animation: gradientShift 14s ease infinite;
   color: white;
   padding: 60px 20px;
   text-align: center;
@@ -17,6 +19,7 @@
   font-size: 3rem;
   margin-bottom: 15px;
   color: white;
+  font-family: var(--font-display);
 }
 
 .hero-subtitle {
@@ -25,10 +28,11 @@
 }
 
 .about-content {
-  background: white;
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(15, 31, 46, 0.06);
 }
 
 .about-section {
@@ -40,15 +44,16 @@
 }
 
 .about-section h2 {
-  color: var(--powder-blue);
+  color: var(--accent-2);
   font-size: 2rem;
   margin-bottom: 20px;
+  font-family: var(--font-display);
 }
 
 .about-section p {
   font-size: 1.1rem;
   line-height: 1.8;
-  color: var(--black);
+  color: var(--muted);
 }
 
 .features-grid {
@@ -61,9 +66,10 @@
 .feature-item {
   text-align: center;
   padding: 30px 20px;
-  background: linear-gradient(135deg, rgba(143, 181, 248, 0.05) 0%, rgba(216, 180, 254, 0.05) 100%);
-  border-radius: 12px;
+  background: var(--panel-gradient);
+  border-radius: var(--radius-md);
   transition: transform 0.3s ease;
+  border: 1px solid rgba(15, 31, 46, 0.05);
 }
 
 .feature-item:hover {
@@ -73,7 +79,7 @@
 .feature-number {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--powder-blue) 0%, var(--lilac) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -85,14 +91,14 @@
 }
 
 .feature-item h3 {
-  color: var(--powder-blue);
+  color: var(--accent-2);
   font-size: 1.3rem;
   margin-bottom: 15px;
 }
 
 .feature-item p {
   font-size: 1rem;
-  color: var(--black);
+  color: var(--muted);
 }
 
 .benefits-list {
@@ -105,22 +111,23 @@
   font-size: 1.1rem;
   padding: 15px 20px;
   margin-bottom: 10px;
-  background: linear-gradient(135deg, rgba(143, 181, 248, 0.08) 0%, rgba(216, 180, 254, 0.08) 100%);
-  border-radius: 8px;
-  border-left: 4px solid var(--powder-blue);
+  background: var(--panel-gradient);
+  border-radius: 10px;
+  border-left: 4px solid var(--accent);
 }
 
 .cta-section {
   text-align: center;
   padding: 40px;
-  background: linear-gradient(135deg, var(--powder-blue) 0%, var(--lilac) 100%);
-  border-radius: 16px;
+  background: var(--cta-gradient);
+  border-radius: var(--radius-lg);
   color: white;
 }
 
 .cta-section h2 {
   color: white;
   margin-bottom: 15px;
+  font-family: var(--font-display);
 }
 
 .cta-section p {

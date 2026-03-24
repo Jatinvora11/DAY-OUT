@@ -65,7 +65,7 @@ const Home = () => {
 
   return (
     <div className="home-container fade-in">
-      <div className="itinerary-card">
+      <div className="itinerary-card reveal">
         <h2 className="itinerary-title">Plan Your DayOut</h2>
         
         {error && <div className="alert alert-error">{error}</div>}

@@ -5,18 +5,21 @@
 }
 
 .profile-card {
-  background: white;
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(15, 31, 46, 0.06);
 }
 
 .profile-header {
-  background: linear-gradient(135deg, var(--lilac) 0%, var(--pink) 100%);
+  background: var(--hero-gradient);
+  background-size: 200% 200%;
+  animation: gradientShift 14s ease infinite;
   color: white;
   padding: 40px 20px;
   text-align: center;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   margin-bottom: 30px;
 }
 
@@ -24,6 +27,7 @@
   color: white;
   font-size: 2rem;
   margin: 0;
+  font-family: var(--font-display);
 }
 
 .profile-details {
@@ -34,8 +38,9 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   font-size: 1.1rem;
+  gap: 16px;
 }
 
 .profile-detail:last-child {
@@ -43,8 +48,12 @@
 }
 
 .profile-detail strong {
-  color: var(--powder-blue);
+  color: var(--accent-2);
   font-weight: 600;
+}
+
+.profile-theme select {
+  max-width: 260px;
 }
 
 .profile-action {
@@ -60,5 +69,9 @@
   .profile-detail {
     flex-direction: column;
     gap: 8px;
+  }
+
+  .profile-theme select {
+    max-width: 100%;
   }
 }

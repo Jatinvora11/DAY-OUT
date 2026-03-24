@@ -5,7 +5,7 @@ import './Landing.css';
 const Landing = () => {
   return (
     <div className="landing-container fade-in">
-      <section className="hero-section">
+      <section className="hero-section reveal">
         <div className="hero-content">
           <h1 className="hero-title">Welcome to DayOut</h1>
           <p className="hero-description">
@@ -27,7 +27,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <section className="features-section">
+      <section className="features-section reveal">
         <h2 className="section-title">Why Choose DayOut?</h2>
         <div className="features-grid">
           <div className="feature-card">
@@ -63,7 +63,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <section className="cta-section">
+      <section className="cta-section reveal">
         <h2>Ready to Plan Your Next Adventure?</h2>
         <p>Join DayOut today and discover the future of travel planning</p>
         <Link to="/register" className="btn btn-primary btn-large">

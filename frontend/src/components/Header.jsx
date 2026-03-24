@@ -17,16 +17,16 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 <li><Link to="/home">Home</Link></li>
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/contact">Contact Us</Link></li>
+                <li><Link to="/about">About</Link></li>
+                <li><Link to="/contact">Contact</Link></li>
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link to="/past-itineraries">Past Itineraries</Link></li>
                 <li><button onClick={logout} className="logout-btn">Logout</button></li>
               </>
             ) : (
               <>
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/contact">Contact Us</Link></li>
+                <li><Link to="/about">About</Link></li>
+                <li><Link to="/contact">Contact</Link></li>
                 <li><Link to="/login">Login</Link></li>
                 <li><Link to="/register">Register</Link></li>
               </>

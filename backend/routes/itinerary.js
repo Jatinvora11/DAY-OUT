@@ -6,9 +6,6 @@ import Itinerary from '../models/Itinerary.js';
 
 const router = express.Router();
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 // @route   POST /api/itinerary/generate
 // @desc    Generate itinerary using Gemini AI
 // @access  Private
@@ -33,12 +30,22 @@ router.post(
     const { location, startDate, endDate, adults, children, budget, tripType, specialRequests } = req.body;
 
     try {
+      // Initialize Gemini AI with environment variable (loaded at runtime)
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      
+      console.log('🚀 Generating itinerary for:', location);
+      console.log('📅 Dates:', startDate, 'to', endDate);
+      console.log('👥 Travelers:', adults, 'adults,', children, 'children');
+      
       const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with an average budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      console.log('🤖 Calling Gemini API...');
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const itineraryText = response.text();
+      
+      console.log('✅ Itinerary generated successfully');
 
       res.json({
         itinerary: itineraryText,
@@ -54,7 +61,9 @@ router.post(
         }
       });
     } catch (error) {
-      console.error('Gemini API Error:', error);
+      console.error('❌ Gemini API Error:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
       res.status(500).json({ message: 'Failed to generate itinerary', error: error.message });
     }
   }

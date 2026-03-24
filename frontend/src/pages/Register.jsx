@@ -96,6 +96,7 @@ const Register = () => {
             />
           </div>
 
+
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}
           </button>

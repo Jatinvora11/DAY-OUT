@@ -1,13 +1,23 @@
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables FIRST, before other imports
+dotenv.config({ path: join(__dirname, '.env') });
+
+console.log('🔑 Environment loaded - GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? `${process.env.GEMINI_API_KEY.substring(0, 20)}... ✅` : '❌ NOT SET');
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import itineraryRoutes from './routes/itinerary.js';
 import contactRoutes from './routes/contact.js';
 import userRoutes from './routes/user.js';
-
-dotenv.config();
 
 const app = express();
 

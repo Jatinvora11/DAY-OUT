@@ -1,10 +1,10 @@
 # DayOut - MERN Stack Travel Itinerary Planner
 
-A modern, AI-powered travel itinerary planning application built with the MERN stack (MongoDB, Express.js, React, Node.js) and Google Gemini AI.
+A modern, AI-powered travel itinerary planning application built with the MERN stack (MongoDB, Express.js, React, Node.js) and Google Gemini API.
 
 ## Features
 
-- 🤖 **AI-Powered Itinerary Generation** - Uses Google Gemini AI to create personalized travel plans
+- 🤖 **AI-Powered Itinerary Generation** - Uses Google Gemini API to create personalized travel plans
 - 🔐 **User Authentication** - Secure JWT-based authentication system
 - 💾 **Save & Manage Itineraries** - Save your favorite itineraries and access them anytime
 - 📱 **Responsive Design** - Beautiful, mobile-friendly interface

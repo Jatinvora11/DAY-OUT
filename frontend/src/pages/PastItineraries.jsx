@@ -6,6 +6,7 @@ const PastItineraries = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     fetchItineraries();
@@ -35,6 +36,10 @@ const PastItineraries = () => {
     }
   };
 
+  const handleToggleExpand = (id) => {
+    setExpandedId((current) => (current === id ? null : id));
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -45,21 +50,25 @@ const PastItineraries = () => {
 
   return (
     <div className="past-itineraries-container fade-in">
-      <div className="itineraries-header">
+      <div className="itineraries-header reveal">
         <h2 className="section-title">Past Itineraries</h2>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
       {itineraries.length === 0 ? (
-        <div className="empty-state">
+        <div className="empty-state reveal">
           <p>No past itineraries found.</p>
           <p>Start planning your next adventure!</p>
         </div>
       ) : (
         <div className="itineraries-list">
           {itineraries.map((itinerary, index) => (
-            <div key={itinerary._id} className="itinerary-item slide-in" style={{animationDelay: `${index * 0.1}s`}}>
+            <div
+              key={itinerary._id}
+              className="itinerary-item reveal"
+              style={{ transitionDelay: `${index * 80}ms` }}
+            >
               <div className="itinerary-header-info">
                 <h3 className="itinerary-location">{itinerary.location}</h3>
                 <span className="itinerary-dates">
@@ -82,23 +91,33 @@ const PastItineraries = () => {
                 </span>
               </div>
 
-              <div className="itinerary-text">
-                {itinerary.itineraryText.split('\n').slice(0, 5).map((line, i) => (
+              <div className={`itinerary-text ${expandedId === itinerary._id ? 'is-expanded' : 'is-collapsed'}`}>
+                {itinerary.itineraryText.split('\n').map((line, i) => (
                   <p key={i}>{line}</p>
                 ))}
-                {itinerary.itineraryText.split('\n').length > 5 && <p>...</p>}
               </div>
 
               <div className="itinerary-footer">
                 <span className="saved-date">
                   Saved on {new Date(itinerary.createdAt).toLocaleDateString()}
                 </span>
-                <button 
-                  onClick={() => handleDelete(itinerary._id)} 
-                  className="btn-delete"
-                >
-                  Delete
-                </button>
+                <div className="itinerary-footer-actions">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleExpand(itinerary._id)}
+                    className="btn btn-secondary btn-compact"
+                    aria-expanded={expandedId === itinerary._id}
+                  >
+                    {expandedId === itinerary._id ? 'Show Less' : 'View Full'}
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(itinerary._id)} 
+                    className="btn-delete"
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
