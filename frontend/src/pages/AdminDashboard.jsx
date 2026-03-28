@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../utils/api.js';
 import './AdminDashboard.css';
+import './PastItineraries.css';
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [details, setDetails] = useState(null);
+  const [expandedItineraryId, setExpandedItineraryId] = useState(null);
   const [globalUsage, setGlobalUsage] = useState(null);
   const [userUsage, setUserUsage] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -67,6 +69,11 @@ const AdminDashboard = () => {
   const handleSelectUser = (userId) => {
     setSelectedUserId(userId);
     loadUserDetails(userId);
+    setExpandedItineraryId(null);
+  };
+
+  const handleToggleExpand = (id) => {
+    setExpandedItineraryId((current) => (current === id ? null : id));
   };
 
   return (
@@ -93,7 +100,7 @@ const AdminDashboard = () => {
           <h3>Usage Overview</h3>
           {globalUsage && (
             <span className="admin-usage-window">
-              Window start: {new Date(globalUsage.window.minuteStart).toLocaleTimeString()} / {new Date(globalUsage.window.dayStart).toLocaleDateString()}
+              Window start: {new Date(globalUsage.window.minuteStart).toLocaleTimeString()} / {new Date(globalUsage.window.dayStart).toLocaleDateString('en-GB')}
             </span>
           )}
         </div>
@@ -211,22 +218,57 @@ const AdminDashboard = () => {
               <div className="admin-itineraries">
                 <h4>Saved Itineraries</h4>
                 {details.itineraries.length ? (
-                  <div className="admin-itinerary-list">
-                    {details.itineraries.map((itinerary) => (
-                      <article key={itinerary._id} className="admin-itinerary-card">
-                        <header>
-                          <h5>{itinerary.location}</h5>
-                          <span>
-                            {new Date(itinerary.startDate).toLocaleDateString()} - {new Date(itinerary.endDate).toLocaleDateString()}
+                  <div className="itineraries-list">
+                    {details.itineraries.map((itinerary, index) => (
+                      <div
+                        key={itinerary._id}
+                        className="itinerary-item"
+                        style={{ transitionDelay: `${index * 60}ms` }}
+                      >
+                        <div className="itinerary-header-info">
+                          <h3 className="itinerary-location">{itinerary.location}</h3>
+                          <span className="itinerary-dates">
+                            {new Date(itinerary.startDate).toLocaleDateString('en-GB')} - {new Date(itinerary.endDate).toLocaleDateString('en-GB')}
                           </span>
-                        </header>
-                        <div className="admin-itinerary-meta">
-                          <span>{itinerary.tripType}</span>
-                          <span>{itinerary.adults} adults, {itinerary.children} children</span>
-                          <span>Budget: {itinerary.budget}</span>
                         </div>
-                        <p>{itinerary.itineraryText}</p>
-                      </article>
+
+                        <div className="itinerary-meta">
+                          <span className="meta-item">
+                            <strong>Adults:</strong> {itinerary.adults}
+                          </span>
+                          <span className="meta-item">
+                            <strong>Children:</strong> {itinerary.children}
+                          </span>
+                          <span className="meta-item">
+                            <strong>Budget:</strong> ₹{itinerary.budget}
+                          </span>
+                          <span className="meta-item">
+                            <strong>Type:</strong> {itinerary.tripType}
+                          </span>
+                        </div>
+
+                        <div className={`itinerary-text ${expandedItineraryId === itinerary._id ? 'is-expanded' : 'is-collapsed'}`}>
+                          {itinerary.itineraryText.split('\n').map((line, i) => (
+                            <p key={i}>{line}</p>
+                          ))}
+                        </div>
+
+                        <div className="itinerary-footer">
+                          <span className="saved-date">
+                            Saved on {new Date(itinerary.createdAt).toLocaleDateString('en-GB')}
+                          </span>
+                          <div className="itinerary-footer-actions">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleExpand(itinerary._id)}
+                              className="btn btn-secondary btn-compact"
+                              aria-expanded={expandedItineraryId === itinerary._id}
+                            >
+                              {expandedItineraryId === itinerary._id ? 'Show Less' : 'View Full'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (
