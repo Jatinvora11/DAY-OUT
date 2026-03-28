@@ -49,4 +49,13 @@ export const contactAPI = {
   getAll: () => api.get('/contact')
 };
 
+// Admin APIs
+export const adminAPI = {
+  getUsers: () => api.get('/admin/users'),
+  getUserDetails: (id) => api.get(`/admin/users/${id}`),
+  updateUserRole: (id, role) => api.patch(`/admin/users/${id}/role`, { role }),
+  getGlobalUsage: () => api.get('/admin/usage/global'),
+  getUserUsage: () => api.get('/admin/usage/users')
+};
+
 export default api;

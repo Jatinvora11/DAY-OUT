@@ -7,7 +7,8 @@ import './Auth.css';
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
+    role: 'user'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,13 @@ const Login = () => {
     });
   };
 
+  const handleRoleChange = (role) => {
+    setFormData((prev) => ({
+      ...prev,
+      role
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -30,7 +38,7 @@ const Login = () => {
       const response = await authAPI.login(formData);
       const { token, ...userData } = response.data;
       login(userData, token);
-      navigate('/home');
+      navigate(userData.role === 'admin' ? '/admin' : '/home');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -46,6 +54,32 @@ const Login = () => {
         {error && <div className="alert alert-error">{error}</div>}
         
         <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>Login as:</label>
+            <div className="role-tabs" role="tablist" aria-label="Login role">
+              <button
+                type="button"
+                className={`role-tab ${formData.role === 'user' ? 'is-active' : ''}`}
+                onClick={() => handleRoleChange('user')}
+                disabled={loading}
+                role="tab"
+                aria-selected={formData.role === 'user'}
+              >
+                User
+              </button>
+              <button
+                type="button"
+                className={`role-tab ${formData.role === 'admin' ? 'is-active' : ''}`}
+                onClick={() => handleRoleChange('admin')}
+                disabled={loading}
+                role="tab"
+                aria-selected={formData.role === 'admin'}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="username">Username:</label>
             <input

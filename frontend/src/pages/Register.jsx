@@ -7,7 +7,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'user',
+    adminCode: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -19,6 +21,13 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleRoleChange = (role) => {
+    setFormData((prev) => ({
+      ...prev,
+      role
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,6 +61,32 @@ const Register = () => {
         {success && <div className="alert alert-success">{success}</div>}
         
         <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>Register as:</label>
+            <div className="role-tabs" role="tablist" aria-label="Register role">
+              <button
+                type="button"
+                className={`role-tab ${formData.role === 'user' ? 'is-active' : ''}`}
+                onClick={() => handleRoleChange('user')}
+                disabled={loading}
+                role="tab"
+                aria-selected={formData.role === 'user'}
+              >
+                User
+              </button>
+              <button
+                type="button"
+                className={`role-tab ${formData.role === 'admin' ? 'is-active' : ''}`}
+                onClick={() => handleRoleChange('admin')}
+                disabled={loading}
+                role="tab"
+                aria-selected={formData.role === 'admin'}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="username">Username:</label>
             <input
@@ -95,6 +130,23 @@ const Register = () => {
               minLength={6}
             />
           </div>
+
+          {formData.role === 'admin' && (
+            <div className="form-group">
+              <label htmlFor="adminCode">Admin registration code:</label>
+              <input
+                type="password"
+                id="adminCode"
+                name="adminCode"
+                value={formData.adminCode}
+                onChange={handleChange}
+                required
+                className="form-input"
+                disabled={loading}
+                minLength={4}
+              />
+            </div>
+          )}
 
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>

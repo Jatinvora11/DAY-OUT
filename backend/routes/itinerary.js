@@ -2,6 +2,7 @@ import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { body, validationResult } from 'express-validator';
 import { protect } from '../middleware/auth.js';
+import { checkAndReserveRateLimit, finalizeRateLimitUsage, estimateTokensFromText } from '../middleware/rateLimiter.js';
 import Itinerary from '../models/Itinerary.js';
 
 const router = express.Router();
@@ -29,6 +30,10 @@ router.post(
 
     const { location, startDate, endDate, adults, children, budget, tripType, specialRequests } = req.body;
 
+    let reservation = null;
+    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with an average budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
+    const estimatedTokens = estimateTokensFromText(prompt);
+
     try {
       // Initialize Gemini AI with environment variable (loaded at runtime)
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -37,13 +42,40 @@ router.post(
       console.log('📅 Dates:', startDate, 'to', endDate);
       console.log('👥 Travelers:', adults, 'adults,', children, 'children');
       
-      const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with an average budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
+      reservation = await checkAndReserveRateLimit({
+        userId: req.user._id,
+        estimatedTokens
+      });
+
+      if (!reservation.allowed) {
+        const retryAfterSeconds = reservation.retryAfterSeconds || 0;
+        const retryMinutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+        const retryHours = Math.max(1, Math.ceil(retryAfterSeconds / 3600));
+        const retryValue = reservation.retryWindow === 'day' ? retryHours : retryMinutes;
+        const retryUnit = reservation.retryWindow === 'day' ? 'hours' : 'minutes';
+
+        res.set('Retry-After', retryAfterSeconds.toString());
+        return res.status(429).json({
+          message: `Rate limit reached. Please try again after ${retryValue} ${retryUnit}.`
+        });
+      }
 
       console.log('🤖 Calling Gemini API...');
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const itineraryText = response.text();
+      const actualTokens = estimateTokensFromText(prompt) + estimateTokensFromText(itineraryText);
+      const tokenDelta = actualTokens - estimatedTokens;
+
+      if (reservation.allowed) {
+        await finalizeRateLimitUsage({
+          userId: req.user._id,
+          minuteStart: reservation.minuteStart,
+          dayStart: reservation.dayStart,
+          tokenDelta
+        });
+      }
       
       console.log('✅ Itinerary generated successfully');
 
@@ -61,6 +93,14 @@ router.post(
         }
       });
     } catch (error) {
+      if (reservation?.allowed) {
+        await finalizeRateLimitUsage({
+          userId: req.user._id,
+          minuteStart: reservation.minuteStart,
+          dayStart: reservation.dayStart,
+          tokenDelta: 0
+        });
+      }
       console.error('❌ Gemini API Error:', error);
       console.error('Error details:', error.message);
       console.error('Error stack:', error.stack);

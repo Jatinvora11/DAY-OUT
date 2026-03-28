@@ -21,7 +21,8 @@ router.post(
   [
     body('username').trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
     body('email').isEmail().normalizeEmail().withMessage('Invalid email format'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+    body('role').optional().isIn(['user', 'admin']).withMessage('Invalid role')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -29,7 +30,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email, password } = req.body;
+    const { username, email, password, role, adminCode } = req.body;
 
     try {
       // Check if user already exists
@@ -43,11 +44,22 @@ router.post(
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
+      if (role === 'admin') {
+        if (!process.env.ADMIN_REGISTER_CODE) {
+          return res.status(500).json({ message: 'Admin registration is not configured' });
+        }
+
+        if (!adminCode || adminCode !== process.env.ADMIN_REGISTER_CODE) {
+          return res.status(403).json({ message: 'Invalid admin registration code' });
+        }
+      }
+
       // Create user
       const user = await User.create({
         username,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: role || 'user'
       });
 
       if (user) {
@@ -55,6 +67,8 @@ router.post(
           _id: user._id,
           username: user.username,
           email: user.email,
+          role: user.role,
+          accountType: user.accountType,
           token: generateToken(user._id)
         });
       }
@@ -72,7 +86,8 @@ router.post(
   '/login',
   [
     body('username').trim().notEmpty().withMessage('Username is required'),
-    body('password').notEmpty().withMessage('Password is required')
+    body('password').notEmpty().withMessage('Password is required'),
+    body('role').optional().isIn(['user', 'admin']).withMessage('Invalid role')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -80,7 +95,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     try {
       // Find user by username
@@ -97,10 +112,16 @@ router.post(
         return res.status(401).json({ message: 'Invalid username or password' });
       }
 
+      if (role && user.role !== role) {
+        return res.status(403).json({ message: 'User does not have the selected role' });
+      }
+
       res.json({
         _id: user._id,
         username: user.username,
         email: user.email,
+        role: user.role,
+        accountType: user.accountType,
         token: generateToken(user._id)
       });
     } catch (error) {

@@ -11,6 +11,7 @@ import PastItineraries from './pages/PastItineraries.jsx';
 import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import Landing from './pages/Landing.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 import './App.css';
 
 // Protected Route Component
@@ -24,9 +25,23 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return <div className="spinner"></div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return user?.role === 'admin' ? children : <Navigate to="/home" />;
+};
+
 const AppShell = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -77,15 +92,18 @@ const AppShell = () => {
     return () => observer.disconnect();
   }, [location.pathname]);
 
+  const defaultRoute = isAuthenticated && user?.role === 'admin' ? '/admin' : '/home';
+
   return (
     <>
       <Header />
       <main className="main-content">
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Landing />} />
-          <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
-          <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
+          <Route path="/" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Landing />} />
+          <Route path="/login" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Login />} />
+          <Route path="/register" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Register />} />
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/past-itineraries" element={<ProtectedRoute><PastItineraries /></ProtectedRoute>} />
           <Route path="/contact" element={<Contact />} />

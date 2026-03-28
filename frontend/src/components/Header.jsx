@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import './Header.css';
 
 const Header = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <header className="header">
@@ -16,6 +16,9 @@ const Header = () => {
           <ul className="nav-list">
             {isAuthenticated ? (
               <>
+                {user?.role === 'admin' && (
+                  <li><Link to="/admin">Admin</Link></li>
+                )}
                 <li><Link to="/home">Home</Link></li>
                 <li><Link to="/about">About</Link></li>
                 <li><Link to="/contact">Contact</Link></li>

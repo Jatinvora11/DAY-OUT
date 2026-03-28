@@ -18,6 +18,7 @@ import authRoutes from './routes/auth.js';
 import itineraryRoutes from './routes/itinerary.js';
 import contactRoutes from './routes/contact.js';
 import userRoutes from './routes/user.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/itinerary', itineraryRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
