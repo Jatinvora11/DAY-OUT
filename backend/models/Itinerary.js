@@ -34,6 +34,11 @@ const itinerarySchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  budgetType: {
+    type: String,
+    enum: ['overall', 'per_person'],
+    default: 'overall'
+  },
   tripType: {
     type: String,
     enum: ['leisure', 'adventure', 'cultural', 'business'],

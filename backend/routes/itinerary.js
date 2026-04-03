@@ -20,6 +20,7 @@ router.post(
     body('adults').isInt({ min: 1 }).withMessage('At least 1 adult is required'),
     body('children').isInt({ min: 0 }).withMessage('Children count must be 0 or more'),
     body('budget').isInt({ min: 0 }).withMessage('Budget must be 0 or more'),
+    body('budgetType').optional().isIn(['overall', 'per_person']).withMessage('Invalid budget type'),
     body('tripType').isIn(['leisure', 'adventure', 'cultural', 'business']).withMessage('Invalid trip type')
   ],
   async (req, res) => {
@@ -28,10 +29,11 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { location, startDate, endDate, adults, children, budget, tripType, specialRequests } = req.body;
+    const { location, startDate, endDate, adults, children, budget, budgetType, tripType, specialRequests } = req.body;
 
     let reservation = null;
-    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with an average budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
+    const budgetLabel = budgetType === 'per_person' ? 'per person' : 'overall';
+    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with a ${budgetLabel} budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
     const estimatedTokens = estimateTokensFromText(prompt);
 
     try {
@@ -88,6 +90,7 @@ router.post(
           adults,
           children,
           budget,
+          budgetType: budgetType || 'overall',
           tripType,
           specialRequests
         }
@@ -119,6 +122,10 @@ router.post(
     body('location').trim().notEmpty().withMessage('Location is required'),
     body('startDate').isDate().withMessage('Valid start date is required'),
     body('endDate').isDate().withMessage('Valid end date is required'),
+    body('adults').isInt({ min: 1 }).withMessage('At least 1 adult is required'),
+    body('children').isInt({ min: 0 }).withMessage('Children count must be 0 or more'),
+    body('budget').isInt({ min: 0 }).withMessage('Budget must be 0 or more'),
+    body('budgetType').optional().isIn(['overall', 'per_person']).withMessage('Invalid budget type'),
     body('itineraryText').trim().notEmpty().withMessage('Itinerary text is required')
   ],
   async (req, res) => {
@@ -127,7 +134,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { location, startDate, endDate, adults, children, budget, tripType, specialRequests, itineraryText } = req.body;
+    const { location, startDate, endDate, adults, children, budget, budgetType, tripType, specialRequests, itineraryText } = req.body;
 
     try {
       const itinerary = await Itinerary.create({
@@ -138,6 +145,7 @@ router.post(
         adults,
         children,
         budget,
+        budgetType: budgetType || 'overall',
         tripType,
         specialRequests,
         itineraryText

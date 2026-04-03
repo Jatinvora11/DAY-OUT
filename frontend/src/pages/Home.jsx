@@ -9,6 +9,7 @@ const Home = () => {
     endDate: '',
     adults: 1,
     children: 0,
+    budgetType: 'overall',
     budget: 0,
     tripType: 'leisure',
     specialRequests: ''
@@ -23,6 +24,13 @@ const Home = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleBudgetTypeChange = (budgetType) => {
+    setFormData((prev) => ({
+      ...prev,
+      budgetType
+    }));
   };
 
   const handleGenerate = async (e) => {
@@ -153,7 +161,33 @@ const Home = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="budget">Average Budget (INR):</label>
+              <label>Budget Type:</label>
+              <div className="budget-tabs" role="tablist" aria-label="Budget type">
+                <button
+                  type="button"
+                  className={`budget-tab ${formData.budgetType === 'overall' ? 'is-active' : ''}`}
+                  onClick={() => handleBudgetTypeChange('overall')}
+                  disabled={loading}
+                  role="tab"
+                  aria-selected={formData.budgetType === 'overall'}
+                >
+                  Overall
+                </button>
+                <button
+                  type="button"
+                  className={`budget-tab ${formData.budgetType === 'per_person' ? 'is-active' : ''}`}
+                  onClick={() => handleBudgetTypeChange('per_person')}
+                  disabled={loading}
+                  role="tab"
+                  aria-selected={formData.budgetType === 'per_person'}
+                >
+                  Per Person
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="budget">Budget Amount (INR):</label>
               <input
                 type="number"
                 id="budget"
@@ -166,7 +200,9 @@ const Home = () => {
                 disabled={loading}
               />
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-group">
               <label htmlFor="tripType">Kind of Trip:</label>
               <select

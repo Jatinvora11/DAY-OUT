@@ -240,7 +240,7 @@ const AdminDashboard = () => {
                             <strong>Children:</strong> {itinerary.children}
                           </span>
                           <span className="meta-item">
-                            <strong>Budget:</strong> ₹{itinerary.budget}
+                            <strong>Budget:</strong> ₹{itinerary.budget} ({itinerary.budgetType === 'per_person' ? 'per person' : 'overall'})
                           </span>
                           <span className="meta-item">
                             <strong>Type:</strong> {itinerary.tripType}
