@@ -21,14 +21,6 @@
   opacity: 0.92;
 }
 
-.footer-credit {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.footer-heart {
-  color: #e63946;
-}
 
 @media (max-width: 768px) {
   .footer {

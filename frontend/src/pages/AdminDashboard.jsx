@@ -175,7 +175,7 @@ const AdminDashboard = () => {
                   >
                     <div className="admin-user-name">{user.username}</div>
                     <div className="admin-user-meta">
-                      <span>{user.email}</span>
+                      <span className="admin-user-email">{user.email}</span>
                       <span className={`admin-role ${user.role}`}>{user.role}</span>
                     </div>
                   </button>
@@ -215,66 +215,68 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="admin-itineraries">
-                <h4>Saved Itineraries</h4>
-                {details.itineraries.length ? (
-                  <div className="itineraries-list">
-                    {details.itineraries.map((itinerary, index) => (
-                      <div
-                        key={itinerary._id}
-                        className="itinerary-item"
-                        style={{ transitionDelay: `${index * 60}ms` }}
-                      >
-                        <div className="itinerary-header-info">
-                          <h3 className="itinerary-location">{itinerary.location}</h3>
-                          <span className="itinerary-dates">
-                            {new Date(itinerary.startDate).toLocaleDateString('en-GB')} - {new Date(itinerary.endDate).toLocaleDateString('en-GB')}
-                          </span>
-                        </div>
+              {details.user.role !== 'admin' && (
+                <div className="admin-itineraries">
+                  <h4>Saved Itineraries</h4>
+                  {details.itineraries.length ? (
+                    <div className="itineraries-list">
+                      {details.itineraries.map((itinerary, index) => (
+                        <div
+                          key={itinerary._id}
+                          className="itinerary-item"
+                          style={{ transitionDelay: `${index * 60}ms` }}
+                        >
+                          <div className="itinerary-header-info">
+                            <h3 className="itinerary-location">{itinerary.location}</h3>
+                            <span className="itinerary-dates">
+                              {new Date(itinerary.startDate).toLocaleDateString('en-GB')} - {new Date(itinerary.endDate).toLocaleDateString('en-GB')}
+                            </span>
+                          </div>
 
-                        <div className="itinerary-meta">
-                          <span className="meta-item">
-                            <strong>Adults:</strong> {itinerary.adults}
-                          </span>
-                          <span className="meta-item">
-                            <strong>Children:</strong> {itinerary.children}
-                          </span>
-                          <span className="meta-item">
-                            <strong>Budget:</strong> ₹{itinerary.budget} ({itinerary.budgetType === 'per_person' ? 'per person' : 'overall'})
-                          </span>
-                          <span className="meta-item">
-                            <strong>Type:</strong> {itinerary.tripType}
-                          </span>
-                        </div>
+                          <div className="itinerary-meta">
+                            <span className="meta-item">
+                              <strong>Adults:</strong> {itinerary.adults}
+                            </span>
+                            <span className="meta-item">
+                              <strong>Children:</strong> {itinerary.children}
+                            </span>
+                            <span className="meta-item">
+                              <strong>Budget:</strong> ₹{itinerary.budget} ({itinerary.budgetType === 'per_person' ? 'per person' : 'overall'})
+                            </span>
+                            <span className="meta-item">
+                              <strong>Type:</strong> {itinerary.tripType}
+                            </span>
+                          </div>
 
-                        <div className={`itinerary-text ${expandedItineraryId === itinerary._id ? 'is-expanded' : 'is-collapsed'}`}>
-                          {itinerary.itineraryText.split('\n').map((line, i) => (
-                            <p key={i}>{line}</p>
-                          ))}
-                        </div>
+                          <div className={`itinerary-text ${expandedItineraryId === itinerary._id ? 'is-expanded' : 'is-collapsed'}`}>
+                            {itinerary.itineraryText.split('\n').map((line, i) => (
+                              <p key={i}>{line}</p>
+                            ))}
+                          </div>
 
-                        <div className="itinerary-footer">
-                          <span className="saved-date">
-                            Saved on {new Date(itinerary.createdAt).toLocaleDateString('en-GB')}
-                          </span>
-                          <div className="itinerary-footer-actions">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleExpand(itinerary._id)}
-                              className="btn btn-secondary btn-compact"
-                              aria-expanded={expandedItineraryId === itinerary._id}
-                            >
-                              {expandedItineraryId === itinerary._id ? 'Show Less' : 'View Full'}
-                            </button>
+                          <div className="itinerary-footer">
+                            <span className="saved-date">
+                              Saved on {new Date(itinerary.createdAt).toLocaleDateString('en-GB')}
+                            </span>
+                            <div className="itinerary-footer-actions">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleExpand(itinerary._id)}
+                                className="btn btn-secondary btn-compact"
+                                aria-expanded={expandedItineraryId === itinerary._id}
+                              >
+                                {expandedItineraryId === itinerary._id ? 'Show Less' : 'View Full'}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="admin-empty">No itineraries saved for this user.</div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="admin-empty">No itineraries saved for this user.</div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </section>

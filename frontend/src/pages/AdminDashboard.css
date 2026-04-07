@@ -177,6 +177,10 @@
   align-items: center;
   gap: 12px;
   font-size: 0.9rem;
+  color: var(--text);
+}
+
+.admin-user-email {
   color: var(--text-muted);
 }
 

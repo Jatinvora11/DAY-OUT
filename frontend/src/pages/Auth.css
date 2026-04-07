@@ -28,6 +28,34 @@
   margin-bottom: 20px;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field .form-input {
+  padding-right: 48px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
 .role-tabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

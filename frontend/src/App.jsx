@@ -25,6 +25,34 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+const UserRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return <div className="spinner"></div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return user?.role === 'admin' ? <Navigate to="/admin" /> : children;
+};
+
+const AdminBlockRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return <div className="spinner"></div>;
+  }
+
+  if (isAuthenticated && user?.role === 'admin') {
+    return <Navigate to="/admin" />;
+  }
+
+  return children;
+};
+
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
@@ -44,12 +72,10 @@ const AppShell = () => {
   const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      document.documentElement.setAttribute('data-theme', 'coastal');
-    } else {
-      const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
-      document.documentElement.setAttribute('data-theme', storedTheme);
-    }
+    const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedMode = localStorage.getItem('dayout-mode') || 'light';
+    const modeSuffix = storedMode === 'dark' ? '-dark' : '';
+    document.documentElement.setAttribute('data-theme', `${storedTheme}${modeSuffix}`);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -102,12 +128,12 @@ const AppShell = () => {
           <Route path="/" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Landing />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to={defaultRoute} /> : <Register />} />
-          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/home" element={<UserRoute><Home /></UserRoute>} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/past-itineraries" element={<ProtectedRoute><PastItineraries /></ProtectedRoute>} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/past-itineraries" element={<UserRoute><PastItineraries /></UserRoute>} />
+          <Route path="/contact" element={<AdminBlockRoute><Contact /></AdminBlockRoute>} />
+          <Route path="/about" element={<AdminBlockRoute><About /></AdminBlockRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
