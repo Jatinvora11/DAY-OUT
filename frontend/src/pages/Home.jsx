@@ -33,6 +33,12 @@ const Home = () => {
     }));
   };
 
+  const handleDateClick = (event) => {
+    if (typeof event.target.showPicker === 'function') {
+      event.target.showPicker();
+    }
+  };
+
   const handleGenerate = async (e) => {
     e.preventDefault();
     setError('');
@@ -64,6 +70,7 @@ const Home = () => {
       };
       await itineraryAPI.save(saveData);
       setSuccess('Itinerary saved successfully!');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save itinerary. Please try again.');
     } finally {
@@ -106,6 +113,7 @@ const Home = () => {
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
+                onClick={handleDateClick}
                 required
                 className="form-input"
                 disabled={loading}
@@ -120,6 +128,7 @@ const Home = () => {
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
+                onClick={handleDateClick}
                 required
                 className="form-input"
                 disabled={loading}
