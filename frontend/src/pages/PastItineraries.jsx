@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { itineraryAPI } from '../utils/api.js';
+import { openItineraryPdf } from '../utils/pdf.js';
 import './PastItineraries.css';
 
 const PastItineraries = () => {
@@ -38,6 +39,25 @@ const PastItineraries = () => {
 
   const handleToggleExpand = (id) => {
     setExpandedId((current) => (current === id ? null : id));
+  };
+
+  const handleDownloadPdf = (itinerary) => {
+    openItineraryPdf({
+      title: `DayOut Itinerary - ${itinerary.location || 'Your Trip'}`,
+      subtitle: itinerary.startDate && itinerary.endDate
+        ? `${new Date(itinerary.startDate).toLocaleDateString()} - ${new Date(itinerary.endDate).toLocaleDateString()}`
+        : '',
+      meta: [
+        { label: 'Adults', value: itinerary.adults },
+        { label: 'Children', value: itinerary.children },
+        {
+          label: 'Budget',
+          value: `INR ${itinerary.budget} (${itinerary.budgetType === 'per_person' ? 'per person' : 'overall'})`
+        },
+        { label: 'Trip Type', value: itinerary.tripType }
+      ],
+      lines: itinerary.itineraryText.split('\n')
+    });
   };
 
   if (loading) {
@@ -109,6 +129,13 @@ const PastItineraries = () => {
                     aria-expanded={expandedId === itinerary._id}
                   >
                     {expandedId === itinerary._id ? 'Show Less' : 'View Full'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPdf(itinerary)}
+                    className="btn btn-secondary btn-compact"
+                  >
+                    Download PDF
                   </button>
                   <button 
                     onClick={() => handleDelete(itinerary._id)} 

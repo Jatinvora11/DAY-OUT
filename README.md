@@ -1,364 +1,189 @@
 # DayOut - MERN Stack Travel Itinerary Planner
 
-A modern, AI-powered travel itinerary planning application built with the MERN stack (MongoDB, Express.js, React, Node.js) and Google Gemini API.
+DayOut is an AI-powered travel itinerary planner that turns a few trip details into a complete day-by-day plan. It solves the "blank page" problem and makes planning faster, more structured, and budget-aware.
 
 ## Features
 
-- 🤖 **AI-Powered Itinerary Generation** - Uses Google Gemini API to create personalized travel plans
-- 🔐 **User Authentication** - Secure JWT-based authentication system
-- 💾 **Save & Manage Itineraries** - Save your favorite itineraries and access them anytime
-- 📱 **Responsive Design** - Beautiful, mobile-friendly interface
-- 🌍 **Worldwide Coverage** - Plan trips to any destination
-- 💰 **Budget-Conscious** - Get recommendations that match your budget
-- 🎨 **Modern UI** - Clean, gradient-based design with smooth animations
+- AI-powered itinerary generation with Google Gemini
+- Secure user authentication with JWT
+- Save, manage, and revisit itineraries anytime
+- Responsive, mobile-first UI
+- Worldwide destination coverage
+- Budget-conscious recommendations with budget type selection
+- Modern UI with smooth animations and theming
+- Download itineraries as PDF
+
+## Why I Built This
+
+Trip planning is time-consuming and usually starts from scratch. I built DayOut to:
+
+- Reduce the time it takes to plan a trip
+- Offer budget-aware, structured itineraries
+- Keep itineraries saved and easy to revisit
+- Provide a clean, responsive UI with admin oversight and usage visibility
+
+## What You Can Do
+
+- Generate itineraries with AI
+- Choose budget type and trip preferences
+- Save, view, and delete itineraries
+- Download itineraries as PDF
+- Manage your profile (update info, change password, delete account)
+- Access an admin dashboard for users and usage stats
+- Use light/dark themes and get a server-down fallback screen
+
+## Key Features
+
+- AI itinerary generation with rate limiting (global + per-user)
+- JWT authentication with role-based access (user/admin)
+- MongoDB Atlas storage for users and itineraries
+- Vercel frontend + Render backend deployment
 
 ## Tech Stack
 
 ### Frontend
-- React 18
-- React Router DOM for navigation
-- Axios for API calls
-- Context API for state management
-- CSS3 with custom animations
+- React 18 + Vite
+- React Router DOM
+- Axios
+- CSS theming
 
 ### Backend
-- Node.js & Express.js
-- MongoDB with Mongoose ODM
-- JWT for authentication
-- Bcryptjs for password hashing
-- Google Generative AI (Gemini API)
-- Express Validator for input validation
+- Node.js + Express
+- MongoDB Atlas + Mongoose
+- JWT + Bcryptjs
+- Gemini API
+- Express Validator
 
-## Prerequisites
+## Local Setup
 
-Before you begin, ensure you have the following installed:
-- Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
-- npm or yarn
-- A Google Gemini API key ([Get it here](https://makersuite.google.com/app/apikey))
-
-## Installation & Setup
-
-### 1. Clone the Repository
-
+### 1) Clone
 ```bash
 git clone <your-repository-url>
-cd DayOut-MERN
+cd DayOut
 ```
 
-### 2. Backend Setup
-
+### 2) Backend
 ```bash
-# Navigate to backend directory
 cd backend
-
-# Install dependencies
 npm install
-
-# Create .env file
 cp .env.example .env
-
-# Edit .env and add your configuration:
-# - MongoDB URI
-# - JWT Secret
-# - Gemini API Key
-# - Port number
 ```
 
-Edit the `.env` file:
+Example `.env`:
 ```
-PORT=5000
+PORT=3000
 MONGODB_URI=mongodb://localhost:27017/dayout
-JWT_SECRET=your_super_secret_jwt_key_change_this
+JWT_SECRET=your_jwt_secret_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
+ADMIN_REGISTER_CODE=your_admin_code
+GLOBAL_RPM=5
+GLOBAL_TPM=250000
+GLOBAL_RPD=20
+USER_RPM=1
+USER_TPM=50000
+USER_RPD=5
 NODE_ENV=development
 ```
 
-### 3. Frontend Setup
-
+### 3) Frontend
 ```bash
-# Navigate to frontend directory (from root)
 cd frontend
-
-# Install dependencies
 npm install
-
-# Create .env file
 cp .env.example .env
 ```
 
-Edit the `.env` file:
+Example `.env`:
 ```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-### 4. Start MongoDB
-
-Make sure MongoDB is running on your system:
-
-```bash
-# macOS (with Homebrew)
-brew services start mongodb-community
-
-# Linux
-sudo systemctl start mongod
-
-# Windows
-net start MongoDB
+VITE_API_URL=http://localhost:3000/api
 ```
 
-### 5. Run the Application
-
-#### Option 1: Run Backend and Frontend Separately
-
-**Terminal 1 - Backend:**
+### 4) Run locally
 ```bash
 cd backend
 npm run dev
 ```
 
-**Terminal 2 - Frontend:**
 ```bash
 cd frontend
-npm start
-```
-
-#### Option 2: Use Concurrently (from root)
-
-You can set up a script to run both simultaneously. Add this to a `package.json` in the root:
-
-```json
-{
-  "name": "dayout-mern",
-  "scripts": {
-    "install-all": "cd backend && npm install && cd ../frontend && npm install",
-    "backend": "cd backend && npm run dev",
-    "frontend": "cd frontend && npm start",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  }
-}
-```
-
-Then run:
-```bash
-npm install
 npm run dev
 ```
 
-## Application URLs
+## Root Scripts
 
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5000/api
-- **Health Check:** http://localhost:5000/api/health
+From the project root:
+```bash
+npm run dev
+```
 
-## API Endpoints
+## URLs (Local)
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000/api
+
+## API Endpoints (Summary)
+
+### Auth
+- `POST /api/auth/register`
+- `POST /api/auth/login`
 
 ### User
-- `GET /api/user/profile` - Get user profile (Protected)
+- `GET /api/user/profile`
+- `PUT /api/user/profile`
+- `PUT /api/user/change-password`
+- `DELETE /api/user/delete-account`
 
 ### Itinerary
-- `POST /api/itinerary/generate` - Generate itinerary with AI (Protected)
-- `POST /api/itinerary/save` - Save itinerary (Protected)
-- `GET /api/itinerary/user` - Get user's itineraries (Protected)
-- `GET /api/itinerary/:id` - Get specific itinerary (Protected)
-- `DELETE /api/itinerary/:id` - Delete itinerary (Protected)
+- `POST /api/itinerary/generate`
+- `POST /api/itinerary/save`
+- `GET /api/itinerary/user`
+- `GET /api/itinerary/:id`
+- `DELETE /api/itinerary/:id`
 
-### Contact
-- `POST /api/contact` - Submit contact message
-- `GET /api/contact` - Get all contact messages
+### Admin
+- `GET /api/admin/users`
+- `GET /api/admin/users/:id`
+- `PUT /api/admin/users/:id/role`
+- `GET /api/admin/usage/global`
+- `GET /api/admin/usage/users`
+
+## Deployment
+
+- Frontend: Vercel
+- Backend: Render
+- Database: MongoDB Atlas
+
+### Vercel (Frontend)
+- Set `VITE_API_URL` to your Render API base (e.g., `https://your-backend.onrender.com/api`).
+- Ensure SPA refresh works with [frontend/vercel.json](frontend/vercel.json).
+
+### Render (Backend)
+- Set env vars: `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `ADMIN_REGISTER_CODE`, rate-limit values.
+- Start command: `npm start`.
+
+### MongoDB Atlas
+- Create a cluster and user.
+- Use the connection string for `MONGODB_URI`.
 
 ## Project Structure
 
 ```
-DayOut-MERN/
+DayOut/
 ├── backend/
 │   ├── config/
-│   │   └── db.js                 # MongoDB connection
 │   ├── middleware/
-│   │   └── auth.js               # JWT authentication middleware
 │   ├── models/
-│   │   ├── User.js               # User schema
-│   │   ├── Itinerary.js          # Itinerary schema
-│   │   └── ContactMessage.js     # Contact message schema
 │   ├── routes/
-│   │   ├── auth.js               # Authentication routes
-│   │   ├── user.js               # User routes
-│   │   ├── itinerary.js          # Itinerary routes
-│   │   └── contact.js            # Contact routes
 │   ├── .env.example
-│   ├── .gitignore
 │   ├── package.json
-│   └── server.js                 # Entry point
-│
+│   └── server.js
 └── frontend/
-    ├── public/
-    │   └── index.html
     ├── src/
-    │   ├── components/
-    │   │   ├── Header.js
-    │   │   ├── Header.css
-    │   │   ├── Footer.js
-    │   │   └── Footer.css
-    │   ├── context/
-    │   │   └── AuthContext.js    # Authentication context
-    │   ├── pages/
-    │   │   ├── Landing.js
-    │   │   ├── Login.js
-    │   │   ├── Register.js
-    │   │   ├── Home.js
-    │   │   ├── Profile.js
-    │   │   ├── PastItineraries.js
-    │   │   ├── Contact.js
-    │   │   ├── About.js
-    │   │   └── [corresponding CSS files]
-    │   ├── utils/
-    │   │   └── api.js            # API utility functions
-    │   ├── App.js
-    │   ├── App.css
-    │   ├── index.js
-    │   └── index.css
     ├── .env.example
-    ├── .gitignore
-    └── package.json
+    ├── package.json
+    └── vite.config.js
 ```
 
-## Usage Guide
+## Notes
 
-### 1. Register an Account
-- Navigate to `/register`
-- Enter username, email, and password (min 6 characters)
-- Click "Register"
-
-### 2. Login
-- Navigate to `/login`
-- Enter your credentials
-- Click "Login"
-
-### 3. Generate Itinerary
-- Go to Home page
-- Fill in the form:
-  - Location
-  - Start and End dates
-  - Number of adults and children
-  - Budget
-  - Trip type (Leisure, Adventure, Cultural, Business)
-  - Special requests (optional)
-- Click "Generate Itinerary"
-- Review the AI-generated itinerary
-- Save it to your account or regenerate if needed
-
-### 4. View Past Itineraries
-- Click "Past Itineraries" in the navigation
-- View all your saved itineraries
-- Delete unwanted itineraries
-
-### 5. Profile
-- Click "Profile" to view your account details
-- See member since date and account information
-
-## Environment Variables
-
-### Backend (.env)
-```
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/dayout
-JWT_SECRET=your_jwt_secret_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-NODE_ENV=development
-```
-
-### Frontend (.env)
-```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-## Security Features
-
-- Password hashing with bcryptjs
-- JWT token-based authentication
-- Protected routes and API endpoints
-- Input validation with express-validator
-- Secure HTTP headers with CORS
-
-## Development
-
-### Backend Development
-```bash
-cd backend
-npm run dev  # Uses nodemon for auto-restart
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm start  # Runs on http://localhost:3000
-```
-
-## Production Deployment
-
-### Backend
-1. Set environment variables
-2. Build: `npm install --production`
-3. Start: `npm start`
-
-### Frontend
-1. Set production API URL in .env
-2. Build: `npm run build`
-3. Serve the `build` folder with a web server
-
-### Deployment Platforms
-- **Backend:** Heroku, Railway, Render, DigitalOcean
-- **Frontend:** Vercel, Netlify, GitHub Pages
-- **Database:** MongoDB Atlas
-
-## Troubleshooting
-
-### MongoDB Connection Issues
-- Ensure MongoDB is running: `mongod --version`
-- Check connection string in `.env`
-- Verify port 27017 is not in use
-
-### API Connection Issues
-- Verify backend is running on port 5000
-- Check CORS configuration
-- Ensure frontend proxy is set correctly
-
-### Gemini API Issues
-- Verify API key is correct
-- Check API quota and usage limits
-- Ensure network connectivity
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a Pull Request
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Credits
-
-- Built with ❤️ using MERN Stack
-- AI powered by Google Gemini
-- Original PHP version migrated to MERN
-
-## Support
-
-For issues and questions:
-- Create an issue on GitHub
-- Contact: support@dayout.com
-
----
-
-**Happy Traveling! ✈️🌍**
+- Rotating `JWT_SECRET` will log users out.
+- The Contact page is informational; API endpoints remain available.

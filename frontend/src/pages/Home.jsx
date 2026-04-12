@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { itineraryAPI } from '../utils/api.js';
+import { openItineraryPdf } from '../utils/pdf.js';
 import './Home.css';
 
 const Home = () => {
@@ -76,6 +77,27 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadPdf = () => {
+    if (!itinerary) return;
+
+    openItineraryPdf({
+      title: `DayOut Itinerary - ${formData.location || 'Your Trip'}`,
+      subtitle: formData.startDate && formData.endDate
+        ? `${formData.startDate} - ${formData.endDate}`
+        : '',
+      meta: [
+        { label: 'Adults', value: formData.adults },
+        { label: 'Children', value: formData.children },
+        {
+          label: 'Budget',
+          value: `INR ${formData.budget} (${formData.budgetType === 'per_person' ? 'per person' : 'overall'})`
+        },
+        { label: 'Trip Type', value: formData.tripType }
+      ],
+      lines: itinerary.itinerary.split('\n')
+    });
   };
 
   return (
@@ -268,6 +290,9 @@ const Home = () => {
             <div className="itinerary-actions">
               <button onClick={handleGenerate} className="btn btn-secondary" disabled={loading}>
                 Regenerate Itinerary
+              </button>
+              <button onClick={handleDownloadPdf} className="btn btn-secondary" disabled={loading}>
+                Download PDF
               </button>
               <button onClick={handleSave} className="btn btn-primary" disabled={loading}>
                 {loading ? 'Saving...' : 'Save Itinerary'}
