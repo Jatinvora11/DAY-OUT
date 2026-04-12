@@ -23,6 +23,20 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => {
+    window.dispatchEvent(new CustomEvent('dayout:server-up'));
+    return response;
+  },
+  (error) => {
+    const status = error?.response?.status;
+    if (!status || status >= 500) {
+      window.dispatchEvent(new CustomEvent('dayout:server-down'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth APIs
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),

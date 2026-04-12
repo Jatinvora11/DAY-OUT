@@ -1,0 +1,43 @@
+.server-down {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.server-down-card {
+  max-width: 520px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(15, 31, 46, 0.12);
+  text-align: center;
+}
+
+.server-down-card h1 {
+  margin: 18px 0 12px;
+  font-size: 2rem;
+  color: var(--accent-2);
+  font-family: var(--font-display);
+}
+
+.server-down-card p {
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.server-down-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(209, 74, 74, 0.12);
+  color: #d14a4a;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}

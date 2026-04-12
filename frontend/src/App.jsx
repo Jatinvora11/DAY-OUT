@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Header from './components/Header.jsx';
@@ -12,6 +12,7 @@ import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import Landing from './pages/Landing.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import ServerDown from './pages/ServerDown.jsx';
 import './App.css';
 
 // Protected Route Component
@@ -70,6 +71,7 @@ const AdminRoute = ({ children }) => {
 const AppShell = () => {
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
+  const [serverDown, setServerDown] = useState(false);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
@@ -118,7 +120,31 @@ const AppShell = () => {
     return () => observer.disconnect();
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleDown = () => setServerDown(true);
+    const handleUp = () => setServerDown(false);
+    window.addEventListener('dayout:server-down', handleDown);
+    window.addEventListener('dayout:server-up', handleUp);
+
+    return () => {
+      window.removeEventListener('dayout:server-down', handleDown);
+      window.removeEventListener('dayout:server-up', handleUp);
+    };
+  }, []);
+
   const defaultRoute = isAuthenticated && user?.role === 'admin' ? '/admin' : '/home';
+
+  if (serverDown) {
+    return (
+      <>
+        <Header />
+        <main className="main-content">
+          <ServerDown onRetry={() => window.location.reload()} />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
