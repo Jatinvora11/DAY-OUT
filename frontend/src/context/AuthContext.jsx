@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { userAPI } from '../utils/api.js';
 
 const AuthContext = createContext();
 
@@ -23,8 +24,21 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      userAPI.getProfile().catch(() => {});
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    };
+
+    window.addEventListener('dayout:auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('dayout:auth-expired', handleAuthExpired);
   }, []);
 
   const login = (userData, userToken) => {

@@ -33,6 +33,9 @@ api.interceptors.response.use(
     if (!status || status >= 500) {
       window.dispatchEvent(new CustomEvent('dayout:server-down'));
     }
+    if (status === 401) {
+      window.dispatchEvent(new CustomEvent('dayout:auth-expired'));
+    }
     return Promise.reject(error);
   }
 );
