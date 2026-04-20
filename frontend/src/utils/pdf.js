@@ -1,84 +1,84 @@
-export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+import { jsPDF } from 'jspdf';
 
-  if (!printWindow) {
-    window.alert('Popup blocked. Please allow popups to download the PDF.');
-    return;
+export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 48;
+  const marginTop = 56;
+  const marginBottom = 56;
+  const lineHeight = 16;
+  let cursorY = marginTop;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text(title, marginX, cursorY);
+  cursorY += 22;
+
+  if (subtitle) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(90);
+    doc.text(subtitle, marginX, cursorY);
+    doc.setTextColor(0);
+    cursorY += 20;
   }
 
-  const metaRows = (meta || [])
-    .map((item) => `<div class="meta-row"><span>${item.label}</span><strong>${item.value}</strong></div>`)
-    .join('');
+  if (meta && meta.length > 0) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    meta.forEach((item) => {
+      const line = `${item.label}: ${item.value}`;
+      doc.text(line, marginX, cursorY);
+      cursorY += 16;
+    });
+    cursorY += 10;
+  }
 
-  const bodyLines = (lines || [])
-    .filter((line) => line.trim() !== '')
-    .map((line) => `<p>${line}</p>`)
-    .join('');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
 
-  const html = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>${title}</title>
-    <style>
-      :root {
-        color-scheme: light;
-      }
-      body {
-        font-family: Arial, sans-serif;
-        margin: 32px;
-        color: #1b1b1b;
-      }
-      h1 {
-        margin: 0 0 6px 0;
-        font-size: 24px;
-      }
-      .subtitle {
-        margin: 0 0 20px 0;
-        color: #5c5c5c;
-        font-size: 14px;
-      }
-      .meta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 10px 16px;
-        margin-bottom: 20px;
-        padding: 12px 14px;
-        background: #f6f6f6;
-        border-radius: 10px;
-      }
-      .meta-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        font-size: 13px;
-        color: #404040;
-      }
-      .content p {
-        margin: 0 0 10px 0;
-        line-height: 1.5;
-      }
-      @media print {
-        body {
-          margin: 20px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <h1>${title}</h1>
-    ${subtitle ? `<p class="subtitle">${subtitle}</p>` : ''}
-    ${metaRows ? `<div class="meta">${metaRows}</div>` : ''}
-    <div class="content">${bodyLines}</div>
-  </body>
-</html>`;
+  const rawText = (lines || []).join('\n');
+  const normalizedText = rawText
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  const normalizedLines = normalizedText.length > 0
+    ? normalizedText.split('\n')
+    : [];
 
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
+  const wrappedLines = [];
+  normalizedLines.forEach((line) => {
+    if (line.trim() === '') {
+      wrappedLines.push('');
+      return;
+    }
+    const wrapped = doc.splitTextToSize(line.trim(), pageWidth - marginX * 2);
+    wrapped.forEach((part) => {
+      const trimmed = part.trim();
+      if (trimmed !== '') {
+        wrappedLines.push(trimmed);
+      }
+    });
+  });
+
+  wrappedLines.forEach((line) => {
+    if (cursorY + lineHeight > pageHeight - marginBottom) {
+      doc.addPage();
+      cursorY = marginTop;
+    }
+
+    if (line === '') {
+      cursorY += Math.round(lineHeight * 0.6);
+      return;
+    }
+
+    doc.text(line, marginX, cursorY);
+    cursorY += lineHeight;
+  });
+
+  const safeTitle = (title || 'DayOut Itinerary').replace(/[^a-z0-9-_ ]/gi, '').trim() || 'DayOut Itinerary';
+  doc.save(`${safeTitle}.pdf`);
 };
