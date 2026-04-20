@@ -7,6 +7,22 @@ import Itinerary from '../models/Itinerary.js';
 
 const router = express.Router();
 
+const cleanGeminiText = (text) => {
+  if (!text) return '';
+  let cleaned = text;
+
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
+  cleaned = cleaned.replace(/^[ \t]*#{1,6}[ \t]*/gm, '');
+  cleaned = cleaned.replace(/^[-*+][ \t]+/gm, '');
+  cleaned = cleaned.replace(/^[ \t]*\d+[.)][ \t]+/gm, '');
+  cleaned = cleaned.replace(/[*_~`]+/g, '');
+  cleaned = cleaned.replace(/\r\n/g, '\n');
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+  return cleaned.trim();
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // @route   POST /api/itinerary/generate
 // @desc    Generate itinerary using Gemini AI
 // @access  Private
@@ -63,10 +79,41 @@ router.post(
       }
 
       console.log('🤖 Calling Gemini API...');
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const itineraryText = response.text();
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+      let itineraryText = '';
+      let lastError = null;
+
+      for (const modelName of modelsToTry) {
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+          try {
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            itineraryText = cleanGeminiText(response.text());
+            break;
+          } catch (error) {
+            lastError = error;
+            const message = String(error?.message || '');
+            const isOverloaded = message.includes('503') || message.includes('Service Unavailable');
+            if (!isOverloaded) {
+              throw error;
+            }
+            if (attempt < 2) {
+              await sleep(800);
+            }
+          }
+        }
+
+        if (itineraryText) {
+          break;
+        }
+
+        console.warn(`⚠️ Gemini model ${modelName} overloaded, trying fallback...`);
+      }
+
+      if (!itineraryText && lastError) {
+        throw lastError;
+      }
       const actualTokens = estimateTokensFromText(prompt) + estimateTokensFromText(itineraryText);
       const tokenDelta = actualTokens - estimatedTokens;
 
