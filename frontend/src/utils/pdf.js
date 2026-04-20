@@ -1,10 +1,4 @@
 export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-
-  if (!printWindow) {
-    return;
-  }
-
   const metaRows = (meta || [])
     .map((item) => `<div class="meta-row"><span>${item.label}</span><strong>${item.value}</strong></div>`)
     .join('');
@@ -14,7 +8,7 @@ export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
     .map((line) => `<p>${line}</p>`)
     .join('');
 
-  printWindow.document.write(`<!doctype html>
+  const html = `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -70,9 +64,33 @@ export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
     ${metaRows ? `<div class="meta">${metaRows}</div>` : ''}
     <div class="content">${bodyLines}</div>
   </body>
-</html>`);
+</html>`;
 
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const frameDoc = iframe.contentWindow?.document;
+  if (!frameDoc) {
+    document.body.removeChild(iframe);
+    window.alert('Unable to open print preview. Please try again.');
+    return;
+  }
+
+  frameDoc.open();
+  frameDoc.write(html);
+  frameDoc.close();
+
+  iframe.onload = () => {
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 1000);
+  };
 };
