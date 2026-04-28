@@ -224,6 +224,13 @@ const Profile = () => {
               >
                 Settings
               </button>
+              <button
+                type="button"
+                className="profile-nav-item profile-nav-logout"
+                onClick={handleLogout}
+              >
+                Log Out
+              </button>
             </aside>
 
             <section className="profile-panel">
@@ -348,14 +355,6 @@ const Profile = () => {
                     >
                       <span>Delete Account</span>
                       <small>Permanently remove your account.</small>
-                    </button>
-                    <button
-                      type="button"
-                      className={`profile-settings-card ${settingsSection === 'logout' ? 'is-active' : ''}`}
-                      onClick={() => setSettingsSection('logout')}
-                    >
-                      <span>Log Out</span>
-                      <small>Sign out from this device.</small>
                     </button>
                   </div>
 
@@ -509,14 +508,6 @@ const Profile = () => {
                     </div>
                   )}
 
-                  {settingsSection === 'logout' && (
-                    <div className="profile-subsection">
-                      <h4>Log Out</h4>
-                      <button type="button" className="btn btn-secondary" onClick={handleLogout}>
-                        Log Out
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </section>

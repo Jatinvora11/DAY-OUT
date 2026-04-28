@@ -115,6 +115,16 @@
   box-shadow: var(--shadow-md);
 }
 
+.profile-nav-logout {
+  margin-top: 12px;
+  border-color: rgba(209, 74, 74, 0.25);
+  color: #c54444;
+}
+
+.profile-nav-logout:hover {
+  border-color: rgba(209, 74, 74, 0.4);
+}
+
 .profile-panel {
   background: var(--surface);
   border-radius: var(--radius-lg);

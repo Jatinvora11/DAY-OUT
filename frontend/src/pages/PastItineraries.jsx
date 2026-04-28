@@ -128,7 +128,7 @@ const PastItineraries = () => {
                     className="btn btn-secondary btn-compact"
                     aria-expanded={expandedId === itinerary._id}
                   >
-                    {expandedId === itinerary._id ? 'Show Less' : 'View Full'}
+                    {expandedId === itinerary._id ? 'Show Less' : 'Show More'}
                   </button>
                   <button
                     type="button"
