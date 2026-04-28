@@ -79,7 +79,12 @@ router.post(
       }
 
       console.log('🤖 Calling Gemini API...');
-      const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+      const modelsToTry = [
+        'gemini-2.5-flash',
+        'gemini-flash-latest',
+        'gemini-pro-latest',
+        'gemini-2.5-pro'
+      ];
       let itineraryText = '';
       let lastError = null;
 
