@@ -15,6 +15,12 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import ServerDown from './pages/ServerDown.jsx';
 import './App.css';
 
+const SUPPORTED_THEMES = ['coastal', 'forest', 'sunset', 'night-sky'];
+
+const getThemeAttribute = (theme, mode) => (
+  theme === 'night-sky' ? 'night-sky' : `${theme}${mode === 'dark' ? '-dark' : ''}`
+);
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -74,12 +80,10 @@ const AppShell = () => {
   const [serverDown, setServerDown] = useState(false);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedThemeValue = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedTheme = SUPPORTED_THEMES.includes(storedThemeValue) ? storedThemeValue : 'coastal';
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
-    const themeAttribute = storedTheme === 'night-sky'
-      ? 'night-sky'
-      : `${storedTheme}${storedMode === 'dark' ? '-dark' : ''}`;
-    document.documentElement.setAttribute('data-theme', themeAttribute);
+    document.documentElement.setAttribute('data-theme', getThemeAttribute(storedTheme, storedMode));
   }, [isAuthenticated]);
 
   useEffect(() => {

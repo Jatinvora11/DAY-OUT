@@ -3,20 +3,21 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import './Header.css';
 
+const SUPPORTED_THEMES = ['coastal', 'forest', 'sunset', 'night-sky'];
+
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [themeMode, setThemeMode] = useState('light');
   const [themeName, setThemeName] = useState('coastal');
 
   const applyTheme = (nextTheme, nextMode) => {
-    const themeAttribute = nextTheme === 'night-sky'
-      ? 'night-sky'
-      : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`;
+    const themeAttribute = nextTheme === 'night-sky' ? 'night-sky' : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`;
     document.documentElement.setAttribute('data-theme', themeAttribute);
   };
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedThemeValue = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedTheme = SUPPORTED_THEMES.includes(storedThemeValue) ? storedThemeValue : 'coastal';
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
     setThemeName(storedTheme);
     setThemeMode(storedMode);

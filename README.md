@@ -11,8 +11,7 @@ DayOut is an AI-powered travel itinerary planner that turns a few trip details i
 - Worldwide destination coverage
 - Budget-conscious recommendations with budget type selection
 - Modern UI with smooth animations and theming
-- Five visual themes: Coastal, Forest, Sunset, Desert, and Aurora
-- Dedicated dark-only Night Sky theme for evening planning
+- Visual themes: Coastal, Forest, Sunset, and a dedicated dark-only Night Sky mode
 - Download itineraries as PDF
 
 ## Why I Built This

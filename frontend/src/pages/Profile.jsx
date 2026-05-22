@@ -7,9 +7,7 @@ import './Profile.css';
 const THEME_OPTIONS = [
   { id: 'coastal', label: 'Coastal', swatches: ['#0ea5a6', '#1f3b5b', '#f5c97a'] },
   { id: 'forest', label: 'Forest', swatches: ['#2f6b4f', '#2c3440', '#c89b4a'] },
-  { id: 'sunset', label: 'Sunset', swatches: ['#ef6f61', '#8f4e83', '#f7c66a'] },
-  { id: 'desert', label: 'Desert', swatches: ['#c7783e', '#2f6f6d', '#f6d365'] },
-  { id: 'aurora', label: 'Aurora', swatches: ['#52d6a3', '#6d8df7', '#d784ff'] }
+  { id: 'sunset', label: 'Sunset', swatches: ['#ef6f61', '#8f4e83', '#f7c66a'] }
 ];
 
 const NIGHT_SKY_THEME = {
@@ -20,6 +18,10 @@ const NIGHT_SKY_THEME = {
 
 const getThemeAttribute = (nextTheme, nextMode) => (
   nextTheme === 'night-sky' ? 'night-sky' : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`
+);
+
+const isSupportedTheme = (themeId) => (
+  themeId === NIGHT_SKY_THEME.id || THEME_OPTIONS.some((option) => option.id === themeId)
 );
 
 const getThemeLabel = (themeId) => (
@@ -80,7 +82,8 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedThemeValue = localStorage.getItem('dayout-theme') || 'coastal';
+    const storedTheme = isSupportedTheme(storedThemeValue) ? storedThemeValue : 'coastal';
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
     setTheme(storedTheme);
     setThemeMode(storedMode);
@@ -339,11 +342,13 @@ const Profile = () => {
                 <div className="profile-panel-content">
                   <h3>Appearance</h3>
                   <div className="profile-detail profile-theme">
-                    <strong>Theme Preference:</strong>
+                    <div className="theme-heading">
+                      <strong>Theme Preference</strong>
+                      <span>{getThemeLabel(theme)}</span>
+                    </div>
                     <div className="theme-control">
-                      <span className="selected-theme-name">{getThemeLabel(theme)}</span>
                       <div className="theme-swatch-row" role="radiogroup" aria-label="Theme preference">
-                        {THEME_OPTIONS.map((option) => (
+                        {[...THEME_OPTIONS, NIGHT_SKY_THEME].map((option) => (
                           <button
                             type="button"
                             key={option.id}
@@ -357,39 +362,29 @@ const Profile = () => {
                             <span
                               aria-hidden="true"
                               style={{
-                                background: `linear-gradient(135deg, ${option.swatches[0]} 0%, ${option.swatches[1]} 55%, ${option.swatches[2]} 100%)`
+                                background: option.id === NIGHT_SKY_THEME.id
+                                  ? `radial-gradient(circle at 30% 25%, ${option.swatches[2]} 0 8%, transparent 9%), linear-gradient(135deg, ${option.swatches[0]} 0%, ${option.swatches[1]} 100%)`
+                                  : `linear-gradient(135deg, ${option.swatches[0]} 0%, ${option.swatches[1]} 55%, ${option.swatches[2]} 100%)`
                               }}
                             />
                           </button>
                         ))}
                       </div>
-                      <button
-                        type="button"
-                        className={`night-sky-swatch ${theme === NIGHT_SKY_THEME.id ? 'is-active' : ''}`}
-                        onClick={() => handleThemePreview(NIGHT_SKY_THEME.id)}
-                        aria-pressed={theme === NIGHT_SKY_THEME.id}
-                      >
-                        <span
-                          aria-hidden="true"
-                          style={{
-                            background: `radial-gradient(circle at 30% 25%, ${NIGHT_SKY_THEME.swatches[2]} 0 8%, transparent 9%), linear-gradient(135deg, ${NIGHT_SKY_THEME.swatches[0]} 0%, ${NIGHT_SKY_THEME.swatches[1]} 100%)`
-                          }}
-                        />
-                        {NIGHT_SKY_THEME.label}
-                      </button>
-                      <button
-                        type="button"
-                        className={`theme-toggle ${themeMode === 'dark' ? 'is-dark' : ''}`}
-                        onClick={handleModeChange}
-                        aria-label="Toggle dark mode"
-                        disabled={theme === 'night-sky'}
-                      >
-                        <span>{theme === 'night-sky' ? 'Dark only' : themeMode === 'dark' ? 'Dark' : 'Light'}</span>
-                        <span className="theme-toggle-indicator" aria-hidden="true"></span>
-                      </button>
-                      <button type="button" className="btn btn-primary btn-compact" onClick={handleAppearanceSave}>
-                        {appearanceSaved ? 'Saved' : 'Save Appearance'}
-                      </button>
+                      <div className="theme-actions">
+                        <button
+                          type="button"
+                          className={`theme-toggle ${themeMode === 'dark' ? 'is-dark' : ''}`}
+                          onClick={handleModeChange}
+                          aria-label="Toggle dark mode"
+                          disabled={theme === 'night-sky'}
+                        >
+                          <span>{theme === 'night-sky' ? 'Dark only' : themeMode === 'dark' ? 'Dark' : 'Light'}</span>
+                          <span className="theme-toggle-indicator" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" className="btn btn-primary btn-compact" onClick={handleAppearanceSave}>
+                          {appearanceSaved ? 'Saved' : 'Save Appearance'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
