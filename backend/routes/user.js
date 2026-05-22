@@ -84,10 +84,10 @@ router.put(
   }
 );
 
-// @route   POST /api/user/change-password
+// @route   PUT /api/user/change-password
 // @desc    Change user password
 // @access  Private
-router.post(
+router.put(
   '/change-password',
   [
     protect,

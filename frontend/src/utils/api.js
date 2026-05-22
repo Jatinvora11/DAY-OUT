@@ -50,7 +50,7 @@ export const authAPI = {
 export const userAPI = {
   getProfile: () => api.get('/user/profile'),
   updateProfile: (payload) => api.put('/user/profile', payload),
-  changePassword: (payload) => api.post('/user/change-password', payload),
+  changePassword: (payload) => api.put('/user/change-password', payload),
   deleteAccount: (payload) => api.delete('/user', { data: payload })
 };
 

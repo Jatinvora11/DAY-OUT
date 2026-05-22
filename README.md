@@ -142,7 +142,7 @@ npm run dev
 ### Admin
 - `GET /api/admin/users`
 - `GET /api/admin/users/:id`
-- `PUT /api/admin/users/:id/role`
+- `PATCH /api/admin/users/:id/role`
 - `GET /api/admin/usage/global`
 - `GET /api/admin/usage/users`
 
