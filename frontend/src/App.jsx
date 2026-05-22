@@ -76,8 +76,10 @@ const AppShell = () => {
   useEffect(() => {
     const storedTheme = localStorage.getItem('dayout-theme') || 'coastal';
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
-    const modeSuffix = storedMode === 'dark' ? '-dark' : '';
-    document.documentElement.setAttribute('data-theme', `${storedTheme}${modeSuffix}`);
+    const themeAttribute = storedTheme === 'night-sky'
+      ? 'night-sky'
+      : `${storedTheme}${storedMode === 'dark' ? '-dark' : ''}`;
+    document.documentElement.setAttribute('data-theme', themeAttribute);
   }, [isAuthenticated]);
 
   useEffect(() => {

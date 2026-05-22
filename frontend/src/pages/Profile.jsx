@@ -4,6 +4,30 @@ import { userAPI } from '../utils/api.js';
 import { Link } from 'react-router-dom';
 import './Profile.css';
 
+const THEME_OPTIONS = [
+  { id: 'coastal', label: 'Coastal', swatches: ['#0ea5a6', '#1f3b5b', '#f5c97a'] },
+  { id: 'forest', label: 'Forest', swatches: ['#2f6b4f', '#2c3440', '#c89b4a'] },
+  { id: 'sunset', label: 'Sunset', swatches: ['#ef6f61', '#8f4e83', '#f7c66a'] },
+  { id: 'desert', label: 'Desert', swatches: ['#c7783e', '#2f6f6d', '#f6d365'] },
+  { id: 'aurora', label: 'Aurora', swatches: ['#52d6a3', '#6d8df7', '#d784ff'] }
+];
+
+const NIGHT_SKY_THEME = {
+  id: 'night-sky',
+  label: 'Night Sky',
+  swatches: ['#080b16', '#233b8f', '#aab7ff']
+};
+
+const getThemeAttribute = (nextTheme, nextMode) => (
+  nextTheme === 'night-sky' ? 'night-sky' : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`
+);
+
+const getThemeLabel = (themeId) => (
+  themeId === NIGHT_SKY_THEME.id
+    ? NIGHT_SKY_THEME.label
+    : THEME_OPTIONS.find((option) => option.id === themeId)?.label || 'Coastal'
+);
+
 const Profile = () => {
   const { user: authUser, logout, updateUser } = useAuth();
   const [user, setUser] = useState(null);
@@ -11,6 +35,7 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [theme, setTheme] = useState('coastal');
   const [themeMode, setThemeMode] = useState('light');
+  const [appearanceSaved, setAppearanceSaved] = useState(true);
   const [personalForm, setPersonalForm] = useState({
     username: '',
     email: ''
@@ -59,16 +84,21 @@ const Profile = () => {
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
     setTheme(storedTheme);
     setThemeMode(storedMode);
-    const modeSuffix = storedMode === 'dark' ? '-dark' : '';
-    document.documentElement.setAttribute('data-theme', `${storedTheme}${modeSuffix}`);
+    document.documentElement.setAttribute('data-theme', getThemeAttribute(storedTheme, storedMode));
   }, []);
 
-  const handleThemeChange = (event) => {
-    const nextTheme = event.target.value;
+  const handleThemePreview = (nextTheme) => {
+    const nextMode = nextTheme === 'night-sky' ? 'dark' : themeMode;
     setTheme(nextTheme);
-    localStorage.setItem('dayout-theme', nextTheme);
-    const modeSuffix = themeMode === 'dark' ? '-dark' : '';
-    document.documentElement.setAttribute('data-theme', `${nextTheme}${modeSuffix}`);
+    setThemeMode(nextMode);
+    setAppearanceSaved(false);
+    document.documentElement.setAttribute('data-theme', getThemeAttribute(nextTheme, nextMode));
+  };
+
+  const handleAppearanceSave = () => {
+    localStorage.setItem('dayout-theme', theme);
+    localStorage.setItem('dayout-mode', theme === 'night-sky' ? 'dark' : themeMode);
+    setAppearanceSaved(true);
   };
 
   const handlePersonalChange = (e) => {
@@ -105,11 +135,12 @@ const Profile = () => {
   };
 
   const handleModeChange = () => {
+    if (theme === 'night-sky') return;
+
     const nextMode = themeMode === 'dark' ? 'light' : 'dark';
     setThemeMode(nextMode);
-    localStorage.setItem('dayout-mode', nextMode);
-    const modeSuffix = nextMode === 'dark' ? '-dark' : '';
-    document.documentElement.setAttribute('data-theme', `${theme}${modeSuffix}`);
+    setAppearanceSaved(false);
+    document.documentElement.setAttribute('data-theme', getThemeAttribute(theme, nextMode));
   };
 
   const handlePasswordChange = (e) => {
@@ -309,27 +340,55 @@ const Profile = () => {
                   <h3>Appearance</h3>
                   <div className="profile-detail profile-theme">
                     <strong>Theme Preference:</strong>
-                    <div>
-                      <select
-                        id="profile-theme"
-                        value={theme}
-                        onChange={handleThemeChange}
-                        className="form-input"
+                    <div className="theme-control">
+                      <span className="selected-theme-name">{getThemeLabel(theme)}</span>
+                      <div className="theme-swatch-row" role="radiogroup" aria-label="Theme preference">
+                        {THEME_OPTIONS.map((option) => (
+                          <button
+                            type="button"
+                            key={option.id}
+                            className={`theme-swatch ${theme === option.id ? 'is-active' : ''}`}
+                            onClick={() => handleThemePreview(option.id)}
+                            aria-label={`Preview ${option.label} theme`}
+                            aria-checked={theme === option.id}
+                            role="radio"
+                            title={option.label}
+                          >
+                            <span
+                              aria-hidden="true"
+                              style={{
+                                background: `linear-gradient(135deg, ${option.swatches[0]} 0%, ${option.swatches[1]} 55%, ${option.swatches[2]} 100%)`
+                              }}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        className={`night-sky-swatch ${theme === NIGHT_SKY_THEME.id ? 'is-active' : ''}`}
+                        onClick={() => handleThemePreview(NIGHT_SKY_THEME.id)}
+                        aria-pressed={theme === NIGHT_SKY_THEME.id}
                       >
-                        <option value="coastal">Coastal Voyage</option>
-                        <option value="desert">Sunrise Desert</option>
-                        <option value="forest">Forest Trek</option>
-                        <option value="atlas">City Atlas</option>
-                      </select>
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            background: `radial-gradient(circle at 30% 25%, ${NIGHT_SKY_THEME.swatches[2]} 0 8%, transparent 9%), linear-gradient(135deg, ${NIGHT_SKY_THEME.swatches[0]} 0%, ${NIGHT_SKY_THEME.swatches[1]} 100%)`
+                          }}
+                        />
+                        {NIGHT_SKY_THEME.label}
+                      </button>
                       <button
                         type="button"
                         className={`theme-toggle ${themeMode === 'dark' ? 'is-dark' : ''}`}
                         onClick={handleModeChange}
                         aria-label="Toggle dark mode"
-                        style={{ marginTop: '10px' }}
+                        disabled={theme === 'night-sky'}
                       >
-                        <span>{themeMode === 'dark' ? 'Dark' : 'Light'}</span>
+                        <span>{theme === 'night-sky' ? 'Dark only' : themeMode === 'dark' ? 'Dark' : 'Light'}</span>
                         <span className="theme-toggle-indicator" aria-hidden="true"></span>
+                      </button>
+                      <button type="button" className="btn btn-primary btn-compact" onClick={handleAppearanceSave}>
+                        {appearanceSaved ? 'Saved' : 'Save Appearance'}
                       </button>
                     </div>
                   </div>

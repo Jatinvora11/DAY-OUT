@@ -9,8 +9,10 @@ const Header = () => {
   const [themeName, setThemeName] = useState('coastal');
 
   const applyTheme = (nextTheme, nextMode) => {
-    const modeSuffix = nextMode === 'dark' ? '-dark' : '';
-    document.documentElement.setAttribute('data-theme', `${nextTheme}${modeSuffix}`);
+    const themeAttribute = nextTheme === 'night-sky'
+      ? 'night-sky'
+      : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`;
+    document.documentElement.setAttribute('data-theme', themeAttribute);
   };
 
   useEffect(() => {

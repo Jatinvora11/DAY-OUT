@@ -77,6 +77,12 @@
   box-shadow: var(--shadow-sm);
 }
 
+.theme-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+  transform: none;
+}
+
 .theme-toggle-indicator {
   width: 34px;
   height: 18px;
@@ -103,11 +109,19 @@
 
 .nav-list li a:hover,
 .logout-btn:hover {
-  background: var(--surface-alt);
+  background: var(--surface-hover);
   color: var(--text);
   transform: translateY(-3px);
   box-shadow: var(--shadow-sm);
   border-color: rgba(15, 31, 46, 0.08);
+}
+
+:root[data-theme$='-dark'] .nav-list li a:hover,
+:root[data-theme$='-dark'] .logout-btn:hover,
+:root[data-theme='night-sky'] .nav-list li a:hover,
+:root[data-theme='night-sky'] .logout-btn:hover {
+  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 
