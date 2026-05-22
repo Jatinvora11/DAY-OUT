@@ -109,7 +109,6 @@
 
 .nav-list li a:hover,
 .logout-btn:hover {
-  background: var(--surface-hover);
   color: var(--text);
   transform: translateY(-3px);
   box-shadow: var(--shadow-sm);
@@ -120,7 +119,6 @@
 :root[data-theme$='-dark'] .logout-btn:hover,
 :root[data-theme='night-sky'] .nav-list li a:hover,
 :root[data-theme='night-sky'] .logout-btn:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
   border-color: rgba(255, 255, 255, 0.08);
 }
 

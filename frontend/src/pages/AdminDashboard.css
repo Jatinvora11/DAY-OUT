@@ -165,7 +165,6 @@
 :root[data-theme$='-dark'] .admin-usage-card:hover,
 :root[data-theme='night-sky'] .admin-user-card:hover,
 :root[data-theme='night-sky'] .admin-usage-card:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
   border-color: rgba(255, 255, 255, 0.12);
 }
 

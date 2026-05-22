@@ -109,7 +109,6 @@
 
 :root[data-theme$='-dark'] .feature-card:hover,
 :root[data-theme='night-sky'] .feature-card:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
   border-color: rgba(255, 255, 255, 0.12);
 }
 

@@ -169,7 +169,6 @@
 }
 
 .profile-nav-item:hover {
-  background: var(--surface-hover);
   border-color: rgba(15, 31, 46, 0.08);
   box-shadow: var(--shadow-sm);
 }
@@ -256,7 +255,6 @@
 :root[data-theme$='-dark'] .profile-settings-card:hover,
 :root[data-theme='night-sky'] .profile-nav-item:hover,
 :root[data-theme='night-sky'] .profile-settings-card:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
   border-color: rgba(255, 255, 255, 0.12);
 }
 

@@ -331,14 +331,8 @@ body {
 }
 
 .btn-secondary:hover {
-  background: var(--surface-hover);
   transform: translateY(-2px);
   border-color: transparent;
-}
-
-:root[data-theme$='-dark'] .btn-secondary:hover,
-:root[data-theme='night-sky'] .btn-secondary:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
 }
 
 /* Form styles */
@@ -449,25 +443,6 @@ input[type='date'] {
   box-shadow: var(--shadow-md);
   margin-bottom: 30px;
   border: 1px solid rgba(15, 31, 46, 0.04);
-}
-
-:root[data-theme$='-dark'] .card:hover,
-:root[data-theme$='-dark'] .auth-card:hover,
-:root[data-theme$='-dark'] .contact-card:hover,
-:root[data-theme$='-dark'] .server-down-card:hover,
-:root[data-theme$='-dark'] .itinerary-card:hover,
-:root[data-theme$='-dark'] .profile-card:hover,
-:root[data-theme$='-dark'] .profile-panel:hover,
-:root[data-theme$='-dark'] .admin-panel:hover,
-:root[data-theme='night-sky'] .card:hover,
-:root[data-theme='night-sky'] .auth-card:hover,
-:root[data-theme='night-sky'] .contact-card:hover,
-:root[data-theme='night-sky'] .server-down-card:hover,
-:root[data-theme='night-sky'] .itinerary-card:hover,
-:root[data-theme='night-sky'] .profile-card:hover,
-:root[data-theme='night-sky'] .profile-panel:hover,
-:root[data-theme='night-sky'] .admin-panel:hover {
-  background: linear-gradient(var(--surface-hover), var(--surface-hover)), var(--surface);
 }
 
 /* Loading spinner */
