@@ -7,9 +7,6 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-const LOCK_TIME_MS = 15 * 60 * 1000;
-const MAX_FAILED_LOGIN_ATTEMPTS = 5;
-
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
@@ -18,38 +15,10 @@ const authLimiter = rateLimit({
   message: { message: 'Too many authentication attempts, please try again later' }
 });
 
-// Generate short-lived access token
-const generateAccessToken = (id) => {
-  return jwt.sign({ id, type: 'access' }, process.env.JWT_SECRET, {
-    expiresIn: '15m'
-  });
-};
-
-// Generate long-lived refresh token
-const generateRefreshToken = (id) => {
-  return jwt.sign({ id, type: 'refresh' }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
-};
-
-const getRefreshCookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000
-});
-
-const sendAuthResponse = (res, statusCode, user) => {
-  const refreshToken = generateRefreshToken(user._id);
-
-  res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
-  return res.status(statusCode).json({
-    _id: user._id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    accountType: user.accountType,
-    token: generateAccessToken(user._id)
+// Generate JWT Token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '30d'
   });
 };
 
@@ -104,7 +73,14 @@ router.post(
       });
 
       if (user) {
-        return sendAuthResponse(res, 201, user);
+        res.status(201).json({
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          accountType: user.accountType,
+          token: generateToken(user._id)
+        });
       }
     } catch (error) {
       console.error(error);
@@ -140,21 +116,10 @@ router.post(
         return res.status(401).json({ message: 'Invalid username or password' });
       }
 
-      if (user.lockUntil && user.lockUntil > new Date()) {
-        return res.status(423).json({ message: 'Account is temporarily locked. Please try again later.' });
-      }
-
       // Check password
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        user.failedLoginAttempts += 1;
-
-        if (user.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
-          user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
-        }
-
-        await user.save();
         return res.status(401).json({ message: 'Invalid username or password' });
       }
 
@@ -162,56 +127,19 @@ router.post(
         return res.status(403).json({ message: 'User does not have the selected role' });
       }
 
-      user.failedLoginAttempts = 0;
-      user.lockUntil = undefined;
-      await user.save();
-
-      return sendAuthResponse(res, 200, user);
+      res.json({
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        accountType: user.accountType,
+        token: generateToken(user._id)
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   }
 );
-
-// @route   POST /api/auth/refresh
-// @desc    Refresh access token
-// @access  Public
-router.post('/refresh', async (req, res) => {
-  const refreshToken = req.cookies?.refreshToken;
-
-  if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token missing' });
-  }
-
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
-
-    if (decoded.type !== 'refresh') {
-      return res.status(401).json({ message: 'Refresh token invalid' });
-    }
-
-    const user = await User.findById(decoded.id).select('-password');
-
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
-
-    return res.json({
-      token: generateAccessToken(user._id)
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(401).json({ message: 'Refresh token invalid' });
-  }
-});
-
-// @route   POST /api/auth/logout
-// @desc    Clear refresh token cookie
-// @access  Public
-router.post('/logout', (req, res) => {
-  res.clearCookie('refreshToken', getRefreshCookieOptions());
-  res.json({ message: 'Logged out successfully' });
-});
 
 export default router;

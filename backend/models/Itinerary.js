@@ -51,10 +51,17 @@ const itinerarySchema = new mongoose.Schema({
   itineraryText: {
     type: String,
     required: true
+  },
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
 });
+
+itinerarySchema.index({ user: 1, createdAt: -1 });
+itinerarySchema.index({ user: 1 });
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
 

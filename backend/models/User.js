@@ -30,13 +30,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['guest', 'registered'],
     default: 'registered'
-  },
-  failedLoginAttempts: {
-    type: Number,
-    default: 0
-  },
-  lockUntil: {
-    type: Date
   }
 }, {
   timestamps: true

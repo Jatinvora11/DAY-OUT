@@ -219,7 +219,10 @@ router.post(
 // @access  Private
 router.get('/user', protect, async (req, res) => {
   try {
-    const itineraries = await Itinerary.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const itineraries = await Itinerary.find({
+      user: req.user._id,
+      deletedAt: null
+    }).sort({ createdAt: -1 });
 
     res.json(itineraries);
   } catch (error) {
@@ -233,7 +236,10 @@ router.get('/user', protect, async (req, res) => {
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findOne({
+      _id: req.params.id,
+      deletedAt: null
+    });
 
     if (!itinerary) {
       return res.status(404).json({ message: 'Itinerary not found' });
@@ -256,7 +262,10 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private
 router.delete('/:id', protect, async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findOne({
+      _id: req.params.id,
+      deletedAt: null
+    });
 
     if (!itinerary) {
       return res.status(404).json({ message: 'Itinerary not found' });
@@ -267,7 +276,8 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this itinerary' });
     }
 
-    await itinerary.deleteOne();
+    itinerary.deletedAt = new Date();
+    await itinerary.save();
 
     res.json({ message: 'Itinerary deleted successfully' });
   } catch (error) {

@@ -14,9 +14,10 @@ console.log('🔑 Environment loaded - GEMINI_API_KEY:', process.env.GEMINI_API_
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import cron from 'node-cron';
 import connectDB from './config/db.js';
+import RateLimitUsage from './models/RateLimitUsage.js';
 import authRoutes from './routes/auth.js';
 import itineraryRoutes from './routes/itinerary.js';
 import contactRoutes from './routes/contact.js';
@@ -27,6 +28,17 @@ const app = express();
 
 // Connect to MongoDB
 connectDB();
+
+// Cleanup old rate limit usage records every hour
+cron.schedule('0 * * * *', async () => {
+  try {
+    const cutoff = new Date(Date.now() - 25 * 60 * 60 * 1000);
+    const result = await RateLimitUsage.deleteMany({ windowStart: { $lt: cutoff } });
+    console.log(`Rate limit cleanup removed ${result.deletedCount} records`);
+  } catch (error) {
+    console.error('Rate limit cleanup failed:', error.message);
+  }
+});
 
 // Middleware
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
@@ -54,7 +66,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(apiLimiter);
-app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
