@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { userAPI } from '../utils/api.js';
+import { authAPI, userAPI } from '../utils/api.js';
 
 const AuthContext = createContext();
 
@@ -17,16 +17,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      userAPI.getProfile().catch(() => {});
-    }
-    setLoading(false);
+    const loadSession = async () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        userAPI.getProfile().catch(() => {});
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const refreshResponse = await authAPI.refresh();
+        const refreshedToken = refreshResponse.data.token;
+        localStorage.setItem('token', refreshedToken);
+        setToken(refreshedToken);
+
+        const profileResponse = await userAPI.getProfile();
+        setUser(profileResponse.data);
+        localStorage.setItem('user', JSON.stringify(profileResponse.data));
+      } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSession();
   }, []);
 
   useEffect(() => {
@@ -41,6 +61,15 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener('dayout:auth-expired', handleAuthExpired);
   }, []);
 
+  useEffect(() => {
+    const handleAuthRefreshed = (event) => {
+      setToken(event.detail.token);
+    };
+
+    window.addEventListener('dayout:auth-refreshed', handleAuthRefreshed);
+    return () => window.removeEventListener('dayout:auth-refreshed', handleAuthRefreshed);
+  }, []);
+
   const login = (userData, userToken) => {
     setUser(userData);
     setToken(userToken);
@@ -48,7 +77,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      // Local logout should still happen if server logout fails.
+    }
+
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');

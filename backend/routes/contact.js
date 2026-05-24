@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import ContactMessage from '../models/ContactMessage.js';
+import { protect, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -41,9 +42,9 @@ router.post(
 );
 
 // @route   GET /api/contact
-// @desc    Get all contact messages (admin only - you can add admin middleware later)
-// @access  Public (should be protected with admin middleware)
-router.get('/', async (req, res) => {
+// @desc    Get all contact messages
+// @access  Admin
+router.get('/', protect, requireAdmin, async (req, res) => {
   try {
     const messages = await ContactMessage.find().sort({ createdAt: -1 });
     res.json(messages);

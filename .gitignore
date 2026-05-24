@@ -18,3 +18,7 @@ frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
 frontend/*.log
+
+dayout-todo.md
+context.md
+dayout-growth-plan.md

@@ -4,6 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -28,11 +29,40 @@ api.interceptors.response.use(
     window.dispatchEvent(new CustomEvent('dayout:server-up'));
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     const status = error?.response?.status;
     if (!status || status >= 500) {
       window.dispatchEvent(new CustomEvent('dayout:server-down'));
     }
+
+    const canRefresh =
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh') &&
+      localStorage.getItem('token');
+
+    if (canRefresh) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+        const { token } = refreshResponse.data;
+
+        localStorage.setItem('token', token);
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        window.dispatchEvent(new CustomEvent('dayout:auth-refreshed', { detail: { token } }));
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new CustomEvent('dayout:auth-expired'));
+        return Promise.reject(refreshError);
+      }
+    }
+
     if (status === 401) {
       window.dispatchEvent(new CustomEvent('dayout:auth-expired'));
     }
@@ -43,7 +73,9 @@ api.interceptors.response.use(
 // Auth APIs
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
-  login: (credentials) => api.post('/auth/login', credentials)
+  login: (credentials) => api.post('/auth/login', credentials),
+  refresh: () => api.post('/auth/refresh'),
+  logout: () => api.post('/auth/logout')
 };
 
 // User APIs
