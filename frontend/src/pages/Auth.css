@@ -13,7 +13,7 @@
   width: 100%;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(15, 31, 46, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .auth-title {
@@ -63,7 +63,7 @@
   background: var(--surface-alt);
   border-radius: 999px;
   padding: 6px;
-  border: 1px solid rgba(15, 31, 46, 0.08);
+  border: 1px solid var(--header-border);
 }
 
 .role-tab {
@@ -80,7 +80,7 @@
 
 .role-tab.is-active {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-  color: #fff;
+  color: var(--on-accent);
   box-shadow: var(--shadow-sm);
 }
 

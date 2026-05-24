@@ -3,26 +3,30 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import './Header.css';
 
-const SUPPORTED_THEMES = ['coastal', 'forest', 'sunset', 'night-sky'];
-
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [themeMode, setThemeMode] = useState('light');
-  const [themeName, setThemeName] = useState('coastal');
 
-  const applyTheme = (nextTheme, nextMode) => {
-    const themeAttribute = nextTheme === 'night-sky' ? 'night-sky' : `${nextTheme}${nextMode === 'dark' ? '-dark' : ''}`;
-    document.documentElement.setAttribute('data-theme', themeAttribute);
+  const applyTheme = (nextMode) => {
+    if (nextMode === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   };
 
   useEffect(() => {
-    const storedThemeValue = localStorage.getItem('dayout-theme') || 'coastal';
-    const storedTheme = SUPPORTED_THEMES.includes(storedThemeValue) ? storedThemeValue : 'coastal';
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
-    setThemeName(storedTheme);
     setThemeMode(storedMode);
-    applyTheme(storedTheme, storedMode);
+    applyTheme(storedMode);
   }, []);
+
+  const handleThemeToggle = () => {
+    const nextMode = themeMode === 'dark' ? 'light' : 'dark';
+    setThemeMode(nextMode);
+    localStorage.setItem('dayout-mode', nextMode);
+    applyTheme(nextMode);
+  };
 
   return (
     <header className="header">
@@ -57,6 +61,16 @@ const Header = () => {
             )}
           </ul>
         </nav>
+        <button
+          type="button"
+          className={`theme-toggle ${themeMode === 'dark' ? 'is-dark' : ''}`}
+          onClick={handleThemeToggle}
+          aria-label="Toggle theme mode"
+          title={themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <span>{themeMode === 'dark' ? 'Dark' : 'Light'}</span>
+          <span className="theme-toggle-indicator" aria-hidden="true"></span>
+        </button>
       </div>
     </header>
   );

@@ -1,6 +1,6 @@
 .footer {
   background: var(--cta-gradient);
-  color: white;
+  color: var(--on-accent);
   text-align: center;
   padding: 30px 20px;
   margin-top: 50px;

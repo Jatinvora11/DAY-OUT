@@ -9,7 +9,7 @@
   border-radius: var(--radius-lg);
   padding: 40px;
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(15, 31, 46, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .contact-title {
@@ -40,7 +40,7 @@
 
 .info-item {
   padding: 12px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border);
   font-size: 1.05rem;
 }
 

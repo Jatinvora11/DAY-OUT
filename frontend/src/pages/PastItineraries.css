@@ -8,7 +8,7 @@
   background: var(--hero-gradient);
   background-size: 200% 200%;
   animation: gradientShift 14s ease infinite;
-  color: white;
+  color: var(--on-accent);
   padding: 40px 20px;
   text-align: center;
   border-radius: var(--radius-lg);
@@ -16,7 +16,7 @@
 }
 
 .section-title {
-  color: white;
+  color: var(--on-accent);
   font-size: 2rem;
   margin: 0;
   font-family: var(--font-display);
@@ -28,7 +28,7 @@
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(15, 31, 46, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .empty-state p {
@@ -48,7 +48,7 @@
   padding: 30px;
   box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(15, 31, 46, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .itinerary-item:hover {
@@ -59,7 +59,7 @@
 .itinerary-header-info {
   margin-bottom: 15px;
   padding-bottom: 15px;
-  border-bottom: 2px solid rgba(15, 31, 46, 0.08);
+  border-bottom: 2px solid var(--header-border);
 }
 
 .itinerary-location {
@@ -146,7 +146,7 @@
 
 .btn-delete {
   background-color: #d14a4a;
-  color: white;
+  color: var(--on-accent);
   border: none;
   padding: 8px 20px;
   border-radius: 20px;
@@ -157,9 +157,9 @@
 }
 
 .btn-delete:hover {
-  background-color: #ba3b3b;
+  background-color: var(--danger-hover);
   transform: translateY(-2px);
-  box-shadow: 0 5px 10px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 5px 10px var(--danger-glow);
 }
 
 @media (max-width: 768px) {
