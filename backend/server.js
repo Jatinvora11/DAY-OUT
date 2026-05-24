@@ -41,10 +41,16 @@ cron.schedule('0 * * * *', async () => {
 });
 
 // Middleware
+if (!process.env.FRONTEND_URL) {
+  console.warn('⚠️  FRONTEND_URL is not set — defaulting to http://localhost:5173. Set this env var in production!');
+}
+
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+console.log('🌐 CORS allowed origins:', allowedOrigins);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
