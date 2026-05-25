@@ -16,6 +16,7 @@ const Header = () => {
   };
 
   useEffect(() => {
+    localStorage.removeItem('dayout-theme');
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
     setThemeMode(storedMode);
     applyTheme(storedMode);

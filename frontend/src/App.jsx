@@ -74,6 +74,7 @@ const AppShell = () => {
   const [serverDown, setServerDown] = useState(false);
 
   useEffect(() => {
+    localStorage.removeItem('dayout-theme');
     const storedMode = localStorage.getItem('dayout-mode') || 'light';
     if (storedMode === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');

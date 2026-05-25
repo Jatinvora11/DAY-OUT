@@ -161,8 +161,8 @@
   border-color: var(--border-hover);
 }
 
-:root[data-theme$='-dark'] .admin-user-card:hover,
-:root[data-theme$='-dark'] .admin-usage-card:hover {
+[data-theme='dark'] .admin-user-card:hover,
+[data-theme='dark'] .admin-usage-card:hover {
   border-color: var(--overlay-line);
 }
 

@@ -104,10 +104,10 @@
 .feature-card:hover {
   transform: translateY(-10px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--border);
+  border-color: var(--accent);
 }
 
-:root[data-theme$='-dark'] .feature-card:hover {
+[data-theme='dark'] .feature-card:hover {
   border-color: var(--overlay-line);
 }
 

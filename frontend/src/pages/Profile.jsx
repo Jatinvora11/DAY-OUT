@@ -34,6 +34,7 @@ const Profile = () => {
   const [showDeletePassword, setShowDeletePassword] = useState(false);
 
   useEffect(() => {
+    localStorage.removeItem('dayout-theme');
     const fetchProfile = async () => {
       try {
         const response = await userAPI.getProfile();

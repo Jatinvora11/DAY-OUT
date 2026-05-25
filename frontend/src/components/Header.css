@@ -21,14 +21,14 @@
 .logo a {
   font-size: 1.8rem;
   font-weight: bold;
-  color: var(--text);
+  color: var(--accent-2);
   text-decoration: none;
   transition: color 0.3s ease;
   font-family: var(--font-display);
 }
 
 .logo a:hover {
-  color: var(--accent-2);
+  color: var(--accent);
 }
 
 

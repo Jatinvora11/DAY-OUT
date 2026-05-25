@@ -37,7 +37,13 @@ router.post(
     body('children').isInt({ min: 0 }).withMessage('Children count must be 0 or more'),
     body('budget').isInt({ min: 0 }).withMessage('Budget must be 0 or more'),
     body('budgetType').optional().isIn(['overall', 'per_person']).withMessage('Invalid budget type'),
-    body('tripType').isIn(['leisure', 'adventure', 'cultural', 'business']).withMessage('Invalid trip type')
+    body('travelPace').optional().isIn(['relaxed', 'moderate', 'packed']).withMessage('Invalid travel pace'),
+    body('accommodationType')
+      .optional()
+      .isIn(['hostel', 'hotel', 'resort', 'airbnb'])
+      .withMessage('Invalid accommodation type'),
+    body('tripStyles').optional().isArray({ max: 2 }).withMessage('Trip styles must be an array of up to 2'),
+    body('mustSee').optional().isArray().withMessage('Must-see must be an array')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -45,11 +51,35 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { location, startDate, endDate, adults, children, budget, budgetType, tripType, specialRequests } = req.body;
+    const {
+      location,
+      startDate,
+      endDate,
+      adults,
+      children,
+      budget,
+      budgetType,
+      travelPace,
+      accommodationType,
+      tripStyles,
+      mustSee,
+      specialRequests,
+      tripType
+    } = req.body;
 
     let reservation = null;
     const budgetLabel = budgetType === 'per_person' ? 'per person' : 'overall';
-    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with a ${budgetLabel} budget of ${budget} INR. The trip type is ${tripType}. Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities, recommended places to visit, estimated costs, and travel tips.`;
+    const paceText = travelPace ? `Travel pace: ${travelPace}.` : '';
+    const stayText = accommodationType ? `Preferred accommodation: ${accommodationType}.` : '';
+    const stylesText = Array.isArray(tripStyles) && tripStyles.length > 0
+      ? `Trip styles: ${tripStyles.join(', ')}.`
+      : tripType
+        ? `Trip style: ${tripType}.`
+        : '';
+    const mustSeeText = Array.isArray(mustSee) && mustSee.length > 0
+      ? `Must-see attractions: ${mustSee.join(', ')}.`
+      : '';
+    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with a ${budgetLabel} budget of ${budget} INR. ${paceText} ${stayText} ${stylesText} ${mustSeeText} Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities with time slots, recommended places to visit, estimated costs, and travel tips.`;
     const estimatedTokens = estimateTokensFromText(prompt);
 
     try {
@@ -143,7 +173,10 @@ router.post(
           children,
           budget,
           budgetType: budgetType || 'overall',
-          tripType,
+          travelPace: travelPace || 'moderate',
+          accommodationType: accommodationType || 'hotel',
+          tripStyles: Array.isArray(tripStyles) ? tripStyles : (tripType ? [tripType] : []),
+          mustSee: Array.isArray(mustSee) ? mustSee : [],
           specialRequests
         }
       });
@@ -178,6 +211,13 @@ router.post(
     body('children').isInt({ min: 0 }).withMessage('Children count must be 0 or more'),
     body('budget').isInt({ min: 0 }).withMessage('Budget must be 0 or more'),
     body('budgetType').optional().isIn(['overall', 'per_person']).withMessage('Invalid budget type'),
+    body('travelPace').optional().isIn(['relaxed', 'moderate', 'packed']).withMessage('Invalid travel pace'),
+    body('accommodationType')
+      .optional()
+      .isIn(['hostel', 'hotel', 'resort', 'airbnb'])
+      .withMessage('Invalid accommodation type'),
+    body('tripStyles').optional().isArray({ max: 2 }).withMessage('Trip styles must be an array of up to 2'),
+    body('mustSee').optional().isArray().withMessage('Must-see must be an array'),
     body('itineraryText').trim().notEmpty().withMessage('Itinerary text is required')
   ],
   async (req, res) => {
@@ -186,7 +226,22 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { location, startDate, endDate, adults, children, budget, budgetType, tripType, specialRequests, itineraryText } = req.body;
+    const {
+      location,
+      startDate,
+      endDate,
+      adults,
+      children,
+      budget,
+      budgetType,
+      travelPace,
+      accommodationType,
+      tripStyles,
+      mustSee,
+      tripType,
+      specialRequests,
+      itineraryText
+    } = req.body;
 
     try {
       const itinerary = await Itinerary.create({
@@ -198,6 +253,10 @@ router.post(
         children,
         budget,
         budgetType: budgetType || 'overall',
+        travelPace: travelPace || 'moderate',
+        accommodationType: accommodationType || 'hotel',
+        tripStyles: Array.isArray(tripStyles) ? tripStyles : (tripType ? [tripType] : []),
+        mustSee: Array.isArray(mustSee) ? mustSee : [],
         tripType,
         specialRequests,
         itineraryText

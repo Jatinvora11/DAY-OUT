@@ -1,14 +1,31 @@
 import { jsPDF } from 'jspdf';
 
-export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
+export const openItineraryPdf = ({ title, subtitle, meta, lines, sections }) => {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 48;
-  const marginTop = 56;
+  const headerHeight = 70;
+  const marginTop = headerHeight + 24;
   const marginBottom = 56;
   const lineHeight = 16;
   let cursorY = marginTop;
+
+  const drawHeader = () => {
+    doc.setFillColor(248, 247, 244);
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+    doc.setDrawColor(201, 120, 42);
+    doc.setLineWidth(1);
+    doc.line(marginX, headerHeight - 1, pageWidth - marginX, headerHeight - 1);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(26, 58, 92);
+    doc.text('DayOut', marginX, 38);
+    doc.setTextColor(0);
+  };
+
+  drawHeader();
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
@@ -38,46 +55,69 @@ export const openItineraryPdf = ({ title, subtitle, meta, lines }) => {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(12);
 
-  const rawText = (lines || []).join('\n');
-  const normalizedText = rawText
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  const renderLines = (contentLines) => {
+    const normalizedText = (contentLines || [])
+      .filter((line) => !/^\s*-{3,}\s*$/.test(line || ''))
+      .filter((line) => !/^\s*Day-by-Day Itinerary\s*:?.*$/i.test(line || ''))
+      .join('\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
 
-  const normalizedLines = normalizedText.length > 0
-    ? normalizedText.split('\n')
-    : [];
+    const normalizedLines = normalizedText.length > 0
+      ? normalizedText.split('\n')
+      : [];
 
-  const wrappedLines = [];
-  normalizedLines.forEach((line) => {
-    if (line.trim() === '') {
-      wrappedLines.push('');
-      return;
-    }
-    const wrapped = doc.splitTextToSize(line.trim(), pageWidth - marginX * 2);
-    wrapped.forEach((part) => {
-      const trimmed = part.trim();
-      if (trimmed !== '') {
-        wrappedLines.push(trimmed);
+    const wrappedLines = [];
+    normalizedLines.forEach((line) => {
+      if (line.trim() === '') {
+        wrappedLines.push('');
+        return;
       }
+      const wrapped = doc.splitTextToSize(line.trim(), pageWidth - marginX * 2);
+      wrapped.forEach((part) => {
+        const trimmed = part.trim();
+        if (trimmed !== '') {
+          wrappedLines.push(trimmed);
+        }
+      });
     });
-  });
 
-  wrappedLines.forEach((line) => {
-    if (cursorY + lineHeight > pageHeight - marginBottom) {
+    wrappedLines.forEach((line) => {
+      if (cursorY + lineHeight > pageHeight - marginBottom) {
+        doc.addPage();
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        cursorY = marginTop;
+      }
+
+      if (line === '') {
+        cursorY += Math.round(lineHeight * 0.6);
+        return;
+      }
+
+      doc.text(line, marginX, cursorY);
+      cursorY += lineHeight;
+    });
+  };
+
+  if (Array.isArray(sections) && sections.length > 0) {
+    sections.forEach((section, index) => {
       doc.addPage();
+      drawHeader();
       cursorY = marginTop;
-    }
-
-    if (line === '') {
-      cursorY += Math.round(lineHeight * 0.6);
-      return;
-    }
-
-    doc.text(line, marginX, cursorY);
-    cursorY += lineHeight;
-  });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text(section.title || 'Itinerary', marginX, cursorY);
+      cursorY += 22;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      renderLines((section.items || []).map((item) => item.text));
+    });
+  } else {
+    renderLines(lines || []);
+  }
 
   const safeTitle = (title || 'DayOut Itinerary').replace(/[^a-z0-9-_ ]/gi, '').trim() || 'DayOut Itinerary';
   doc.save(`${safeTitle}.pdf`);

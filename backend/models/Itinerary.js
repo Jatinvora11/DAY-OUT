@@ -39,10 +39,28 @@ const itinerarySchema = new mongoose.Schema({
     enum: ['overall', 'per_person'],
     default: 'overall'
   },
+  travelPace: {
+    type: String,
+    enum: ['relaxed', 'moderate', 'packed'],
+    default: 'moderate'
+  },
+  accommodationType: {
+    type: String,
+    enum: ['hostel', 'hotel', 'resort', 'airbnb'],
+    default: 'hotel'
+  },
+  tripStyles: {
+    type: [String],
+    default: []
+  },
+  mustSee: {
+    type: [String],
+    default: []
+  },
   tripType: {
     type: String,
     enum: ['leisure', 'adventure', 'cultural', 'business'],
-    required: true
+    required: false
   },
   specialRequests: {
     type: String,
