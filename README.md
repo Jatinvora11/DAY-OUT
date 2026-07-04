@@ -2,6 +2,12 @@
 
 DayOut is an AI-powered travel itinerary planner that turns a few trip details into a complete day-by-day plan. It solves the "blank page" problem and makes planning faster, more structured, and budget-aware.
 
+## Project Summary
+
+* Built a full-stack AI travel planner where users input destination, dates, and budget to receive a Gemini-generated day-by-day itinerary; deployed frontend on Vercel, backend on Render.
+* Designed a custom token-aware rate limiter in MongoDB tracking requests and token usage per-user and globally across minute/day windows — preventing API cost overruns without third-party libraries.
+* Implemented role-based access control (user/admin), JWT authentication, admin dashboard with live usage analytics, and a multi-theme UI (4 palettes × light/dark mode) with React + Vite.
+
 ## Features
 
 - AI-powered itinerary generation with Google Gemini

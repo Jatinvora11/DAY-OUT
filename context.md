@@ -7,6 +7,12 @@ This document provides a comprehensive technical overview of the **DayOut** proj
 ## 1. Project Overview & Core Features
 **DayOut** is an AI-powered travel itinerary planner that takes basic trip parameters (destination, dates, number of travelers, budget, budget type, trip style, and special requests) and generates a structured, day-by-day itinerary.
 
+### Project Summary
+* Built a full-stack AI travel planner where users input destination, dates, and budget to receive a Gemini-generated day-by-day itinerary; deployed frontend on Vercel, backend on Render.
+* Designed a custom token-aware rate limiter in MongoDB tracking requests and token usage per-user and globally across minute/day windows — preventing API cost overruns without third-party libraries.
+* Implemented role-based access control (user/admin), JWT authentication, admin dashboard with live usage analytics, and a multi-theme UI (4 palettes × light/dark mode) with React + Vite.
+
+
 ### Key Capabilities
 - **AI Itinerary Generation:** Leverages Google Gemini APIs with multiple fallback models and auto-retry capabilities.
 - **Smart Rate Limiting:** Implements custom minute/day limits on both global and per-user levels, measuring both request counts and estimated token consumption.
