@@ -150,25 +150,31 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
+      <div className="profile-container fade-in">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--sp-16)' }}>
+          <div className="spinner" />
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="alert alert-error">{error}</div>;
+    return (
+      <div className="profile-container">
+        <div className="alert alert-error">{error}</div>
+      </div>
+    );
   }
 
   return (
     <div className="profile-container fade-in">
-      <div className="profile-card reveal">
-        <div className="profile-header">
-          <h2 className="profile-title">Profile</h2>
-        </div>
+      <div className="profile-top">
+        <h1>My Profile</h1>
+        <p>Manage your account, personal info, and settings.</p>
+      </div>
 
-        {user && (
-          <div className="profile-layout">
+      {user && (
+        <div className="profile-layout">
             <aside className="profile-sidebar">
               <button
                 type="button"
@@ -201,9 +207,10 @@ const Profile = () => {
             </aside>
 
             <section className="profile-panel">
-              {activeSection === 'account' && (
+            {activeSection === 'account' && (
+              <>
+                <div className="profile-panel-header"><h3>Account Overview</h3></div>
                 <div className="profile-panel-content">
-                  <h3>Account</h3>
                   <div className="profile-detail">
                     <strong>Username:</strong>
                     <span>{user.username}</span>
@@ -222,17 +229,19 @@ const Profile = () => {
                   </div>
                   {authUser?.role !== 'admin' && (
                     <div className="profile-action">
-                      <Link to="/past-itineraries" className="btn btn-secondary">
-                        View Past Itineraries
+                      <Link to="/past-itineraries" className="btn btn-secondary btn-sm">
+                        View My Trips
                       </Link>
                     </div>
                   )}
                 </div>
-              )}
+              </>
+            )}
 
-              {activeSection === 'personal' && (
+            {activeSection === 'personal' && (
+              <>
+                <div className="profile-panel-header"><h3>Personal Info</h3></div>
                 <div className="profile-panel-content">
-                  <h3>Personal Info</h3>
                   {personalError && <div className="alert alert-error">{personalError}</div>}
                   {personalSuccess && <div className="alert alert-success">{personalSuccess}</div>}
 
@@ -269,11 +278,13 @@ const Profile = () => {
                     </button>
                   </form>
                 </div>
-              )}
+              </>
+            )}
 
-              {activeSection === 'settings' && (
+            {activeSection === 'settings' && (
+              <>
+                <div className="profile-panel-header"><h3>Settings</h3></div>
                 <div className="profile-panel-content">
-                  <h3>Settings</h3>
                   <div className="profile-settings-list">
                     <button
                       type="button"
@@ -444,13 +455,14 @@ const Profile = () => {
                   )}
 
                 </div>
-              )}
-            </section>
-          </div>
-        )}
-      </div>
+              </>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Profile;
+

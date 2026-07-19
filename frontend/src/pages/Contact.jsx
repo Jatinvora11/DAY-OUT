@@ -1,27 +1,44 @@
 import React from 'react';
 import './Contact.css';
 
-const Contact = () => {
-  return (
-    <div className="contact-container fade-in">
-      <div className="contact-card reveal">
-        <h2 className="contact-title">Contact Us</h2>
+const Contact = () => (
+  <div className="contact-page fade-in">
+    <section className="contact-hero">
+      <div className="container">
+        <span className="section-label">Get in Touch</span>
+        <h1 className="contact-headline">We'd love to hear from you.</h1>
+        <p className="contact-sub">
+          Questions, feedback, or just want to say hi? Reach out — we usually respond within 24 hours.
+        </p>
+      </div>
+    </section>
 
-        <div className="contact-info">
-          <h3>Our Locations</h3>
-          <div className="info-item">
-            <strong>Headquarters:</strong> Mumbai, India
+    <section className="contact-body">
+      <div className="container container-narrow">
+        <div className="contact-cards">
+          <div className="contact-info-card reveal">
+            <div className="contact-card-icon">📍</div>
+            <h3>Headquarters</h3>
+            <p>Mumbai, India</p>
           </div>
-          <div className="info-item">
-            <strong>Phone:</strong> 9324815846
+          <div className="contact-info-card reveal">
+            <div className="contact-card-icon">📞</div>
+            <h3>Phone</h3>
+            <p>
+              <a href="tel:9324815846">9324815846</a>
+            </p>
           </div>
-          <div className="info-item">
-            <strong>Email:</strong> jatinvora11105@gmail.com
+          <div className="contact-info-card reveal">
+            <div className="contact-card-icon">✉️</div>
+            <h3>Email</h3>
+            <p>
+              <a href="mailto:jatinvora11105@gmail.com">jatinvora11105@gmail.com</a>
+            </p>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    </section>
+  </div>
+);
 
 export default Contact;

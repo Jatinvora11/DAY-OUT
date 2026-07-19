@@ -8,7 +8,7 @@ import User from '../models/User.js';
 const router = express.Router();
 
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: 5 * 60 * 1000, // 5 minutes
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,

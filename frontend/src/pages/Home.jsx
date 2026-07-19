@@ -30,11 +30,11 @@ const ACCOMMODATION_TYPES = [
 ];
 
 const LOADING_STEPS = [
-  'Researching destination',
-  'Building schedule',
-  'Adding restaurants',
-  'Balancing travel pace',
-  'Finalizing itinerary'
+  'Analysing millions of travel possibilities...',
+  'Curating hidden gems and local favourites...',
+  'Balancing your ideal travel pace...',
+  'Optimising routes and activity timings...',
+  'Finalising your perfect itinerary...'
 ];
 
 const parseStructuredItinerary = (text) => {
@@ -130,8 +130,14 @@ const Home = () => {
     if (!loading) return undefined;
     setLoadingStep(0);
     const interval = setInterval(() => {
-      setLoadingStep((prev) => (prev + 1) % LOADING_STEPS.length);
-    }, 1600);
+      setLoadingStep((prev) => {
+        // Cap at second-to-last step while waiting for backend
+        if (prev < LOADING_STEPS.length - 2) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 2000); // slightly slower interval
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -169,7 +175,7 @@ const Home = () => {
       if (selected.has(style)) {
         selected.delete(style);
       } else {
-        if (selected.size >= 2) {
+        if (selected.size >= 3) {
           return prev;
         }
         selected.add(style);
@@ -221,6 +227,13 @@ const Home = () => {
 
     try {
       const response = await itineraryAPI.generate(formData);
+      
+      // Backend generation is done! Show the final step.
+      setLoadingStep(LOADING_STEPS.length - 1);
+      
+      // Wait a moment so the user sees the final message before it renders
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
       setItinerary(response.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to generate itinerary. Please try again.');
@@ -332,34 +345,41 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container fade-in">
-      <div className="itinerary-card reveal">
-        <h2 className="itinerary-title">Plan Your DayOut</h2>
-        
-        {error && <div className="alert alert-error">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+    <div className="home-page fade-in">
+      <div className="home-header">
+        <h1>Plan Your Trip</h1>
+        <p>Fill in your details and let AI craft your perfect itinerary.</p>
+      </div>
 
-        <form onSubmit={handleFormSubmit} onKeyDown={handleFormKeyDown} className="itinerary-form">
-          <div className="wizard-steps" role="tablist" aria-label="Trip planner steps">
-            {steps.map((step, index) => (
-              <button
-                type="button"
-                key={step}
-                className={`wizard-step ${activeStep === index ? 'is-active' : ''}`}
-                onClick={() => setActiveStep(index)}
-                aria-current={activeStep === index}
-              >
-                <span className="wizard-step-count">{index + 1}</span>
-                <span className="wizard-step-label">{step}</span>
-              </button>
-            ))}
-          </div>
+      {error && <div className="alert alert-error">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
-          {activeStep === 0 && (
-            <div className="wizard-panel">
-              <div className="form-row">
+      <div className="planner-card">
+        {/* Sidebar */}
+        <aside className="planner-sidebar">
+          <p className="planner-sidebar-title">Steps</p>
+          {steps.map((step, index) => (
+            <button
+              type="button"
+              key={step}
+              className={`step-btn${activeStep === index ? ' is-active' : ''}${activeStep > index ? ' is-done' : ''}`}
+              onClick={() => setActiveStep(index)}
+            >
+              <span className="step-indicator">{activeStep > index ? '✓' : index + 1}</span>
+              <span className="step-label">{step}</span>
+            </button>
+          ))}
+        </aside>
+
+        {/* Form panel */}
+        <form onSubmit={handleFormSubmit} onKeyDown={handleFormKeyDown} className="planner-content">
+          <h3 className="planner-step-title">{steps[activeStep]}</h3>
+          <div className="planner-form-body">
+
+            {activeStep === 0 && (
+              <div>
                 <div className="form-group">
-                  <label htmlFor="location">Location:</label>
+                  <label htmlFor="location">Destination</label>
                   <input
                     type="text"
                     id="location"
@@ -372,376 +392,252 @@ const Home = () => {
                     placeholder="e.g., Paris, France"
                   />
                 </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="startDate">Start Date:</label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleChange}
-                    onClick={handleDateClick}
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="endDate">End Date:</label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleChange}
-                    onClick={handleDateClick}
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeStep === 1 && (
-            <div className="wizard-panel">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="adults">Number of Adults:</label>
-                  <input
-                    type="number"
-                    id="adults"
-                    name="adults"
-                    value={formData.adults}
-                    onChange={handleChange}
-                    min="1"
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="children">Number of Children:</label>
-                  <input
-                    type="number"
-                    id="children"
-                    name="children"
-                    value={formData.children}
-                    onChange={handleChange}
-                    min="0"
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="accommodationType">Accommodation Type:</label>
-                  <select
-                    id="accommodationType"
-                    name="accommodationType"
-                    value={formData.accommodationType}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  >
-                    {ACCOMMODATION_TYPES.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeStep === 2 && (
-            <div className="wizard-panel">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Budget Type:</label>
-                  <div className="budget-tabs" role="tablist" aria-label="Budget type">
-                    <button
-                      type="button"
-                      className={`budget-tab ${formData.budgetType === 'overall' ? 'is-active' : ''}`}
-                      onClick={() => handleBudgetTypeChange('overall')}
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label htmlFor="startDate">Start Date</label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleChange}
+                      onClick={handleDateClick}
+                      required
+                      className="form-input"
                       disabled={loading}
-                      role="tab"
-                      aria-selected={formData.budgetType === 'overall'}
-                    >
-                      Overall
-                    </button>
-                    <button
-                      type="button"
-                      className={`budget-tab ${formData.budgetType === 'per_person' ? 'is-active' : ''}`}
-                      onClick={() => handleBudgetTypeChange('per_person')}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="endDate">End Date</label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleChange}
+                      onClick={handleDateClick}
+                      required
+                      className="form-input"
                       disabled={loading}
-                      role="tab"
-                      aria-selected={formData.budgetType === 'per_person'}
-                    >
-                      Per Person
-                    </button>
+                    />
                   </div>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="budget">Budget Amount (INR):</label>
-                  <input
-                    type="number"
-                    id="budget"
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleChange}
-                    min="0"
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  />
-                </div>
               </div>
+            )}
 
-              <div className="form-row">
+            {activeStep === 1 && (
+              <div>
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label htmlFor="adults">Adults</label>
+                    <input type="number" id="adults" name="adults" value={formData.adults}
+                      onChange={handleChange} min="1" required className="form-input" disabled={loading} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="children">Children</label>
+                    <input type="number" id="children" name="children" value={formData.children}
+                      onChange={handleChange} min="0" required className="form-input" disabled={loading} />
+                  </div>
+                </div>
                 <div className="form-group">
-                  <label htmlFor="travelPace">Travel Pace:</label>
-                  <select
-                    id="travelPace"
-                    name="travelPace"
-                    value={formData.travelPace}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                    disabled={loading}
-                  >
-                    {TRAVEL_PACES.map((pace) => (
-                      <option key={pace.value} value={pace.value}>
-                        {pace.label}
-                      </option>
+                  <label htmlFor="accommodationType">Accommodation Type</label>
+                  <select id="accommodationType" name="accommodationType" value={formData.accommodationType}
+                    onChange={handleChange} required className="form-input" disabled={loading}>
+                    {ACCOMMODATION_TYPES.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
-                  <p className="helper-text">Relaxed = fewer activities, Packed = full days.</p>
                 </div>
               </div>
+            )}
 
-              <div className="form-group">
-                <label>Trip Styles (pick up to 2):</label>
-                <div className="trip-style-grid" role="group" aria-label="Trip styles">
-                  {TRIP_STYLES.map((style) => (
-                    <button
-                      type="button"
-                      key={style}
-                      className={`trip-style-pill ${formData.tripStyles.includes(style) ? 'is-active' : ''}`}
-                      onClick={() => handleTripStyleToggle(style)}
-                      disabled={loading}
-                    >
-                      {style}
-                    </button>
-                  ))}
+            {activeStep === 2 && (
+              <div>
+                <div className="form-group">
+                  <label>Budget Type</label>
+                  <div className="budget-toggle" role="tablist" aria-label="Budget type">
+                    <button type="button" className={`budget-tab${formData.budgetType === 'overall' ? ' is-active' : ''}`}
+                      onClick={() => handleBudgetTypeChange('overall')} disabled={loading}
+                      role="tab" aria-selected={formData.budgetType === 'overall'}>Overall</button>
+                    <button type="button" className={`budget-tab${formData.budgetType === 'per_person' ? ' is-active' : ''}`}
+                      onClick={() => handleBudgetTypeChange('per_person')} disabled={loading}
+                      role="tab" aria-selected={formData.budgetType === 'per_person'}>Per Person</button>
+                  </div>
                 </div>
-                <p className="helper-text">Choose up to two styles for a balanced plan.</p>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="mustSee">Must-See Attractions:</label>
-                <div className="tag-input">
-                  {formData.mustSee.map((tag) => (
-                    <span key={tag} className="tag-chip">
-                      {tag}
-                      <button
-                        type="button"
-                        className="tag-remove"
-                        onClick={() => handleRemoveMustSee(tag)}
-                        aria-label={`Remove ${tag}`}
-                      >
-                        ×
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label htmlFor="budget">Budget Amount (INR)</label>
+                    <input type="number" id="budget" name="budget" value={formData.budget}
+                      onChange={handleChange} min="0" required className="form-input" disabled={loading} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="travelPace">Travel Pace</label>
+                    <select id="travelPace" name="travelPace" value={formData.travelPace}
+                      onChange={handleChange} required className="form-input" disabled={loading}>
+                      {TRAVEL_PACES.map((pace) => (
+                        <option key={pace.value} value={pace.value}>{pace.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Trip Style <span style={{ fontWeight: 400, color: 'var(--text-3)', fontSize: '0.82rem' }}>(pick up to 3)</span></label>
+                  <div className="style-pill-group" role="group" aria-label="Trip styles">
+                    {TRIP_STYLES.map((style) => (
+                      <button type="button" key={style}
+                        className={`style-pill${formData.tripStyles.includes(style) ? ' is-active' : ''}`}
+                        onClick={() => handleTripStyleToggle(style)} disabled={loading}>
+                        {style.charAt(0).toUpperCase() + style.slice(1)}
                       </button>
-                    </span>
-                  ))}
-                  <input
-                    type="text"
-                    id="mustSee"
-                    name="mustSee"
-                    value={mustSeeInput}
-                    onChange={(event) => setMustSeeInput(event.target.value)}
-                    onKeyDown={handleMustSeeKeyDown}
-                    onBlur={handleMustSeeBlur}
-                    placeholder="Add landmark and press Enter"
-                    className="tag-input-field"
-                    disabled={loading}
-                  />
+                    ))}
+                  </div>
                 </div>
-                <p className="helper-text">We will lock these into the itinerary.</p>
+                <div className="form-group">
+                  <label>Must-See Attractions</label>
+                  <div className="tag-input-wrap">
+                    {formData.mustSee.map((tag) => (
+                      <span key={tag} className="tag-chip">
+                        {tag}
+                        <button type="button" className="tag-remove" onClick={() => handleRemoveMustSee(tag)} aria-label={`Remove ${tag}`}>×</button>
+                      </span>
+                    ))}
+                    <input type="text" id="mustSee" value={mustSeeInput}
+                      onChange={(e) => setMustSeeInput(e.target.value)}
+                      onKeyDown={handleMustSeeKeyDown} onBlur={handleMustSeeBlur}
+                      placeholder="Type and press Enter" className="tag-field" disabled={loading} />
+                  </div>
+                  <p className="form-hint">We will prioritise these in the itinerary.</p>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="specialRequests">Special Requests</label>
+                  <textarea id="specialRequests" name="specialRequests" value={formData.specialRequests}
+                    onChange={handleChange} className="form-textarea" disabled={loading}
+                    placeholder="Dietary restrictions, accessibility needs, preferences…" />
+                </div>
               </div>
+            )}
 
-              <div className="form-group">
-                <label htmlFor="specialRequests">Special Requests:</label>
-                <textarea
-                  id="specialRequests"
-                  name="specialRequests"
-                  value={formData.specialRequests}
-                  onChange={handleChange}
-                  className="form-textarea"
-                  disabled={loading}
-                  placeholder="Dietary restrictions, accessibility needs, or preferences..."
-                />
-              </div>
-            </div>
-          )}
+          </div>{/* planner-form-body */}
 
-          <div className="wizard-actions">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handlePrevStep}
-              disabled={loading || activeStep === 0}
-            >
-              Back
-            </button>
+          <div className="planner-actions">
+            <button type="button" className="btn btn-secondary" onClick={handlePrevStep}
+              disabled={loading || activeStep === 0}>Back</button>
             {activeStep < steps.length - 1 ? (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleNextStep}
-                disabled={loading || !canProceedToNext()}
-              >
-                Next
-              </button>
+              <button type="button" className="btn btn-primary" onClick={handleNextStep}
+                disabled={loading || !canProceedToNext()}>Next →</button>
             ) : (
-              <button
-                type="button"
-                className="btn btn-primary btn-full"
-                disabled={loading}
-                onClick={handleGenerateClick}
-              >
-                {loading ? 'Generating...' : 'Generate Itinerary'}
+              <button type="button" className="btn btn-primary" disabled={loading}
+                onClick={handleGenerateClick}>
+                {loading ? 'Generating…' : 'Generate Itinerary →'}
               </button>
             )}
           </div>
         </form>
+      </div>{/* planner-card */}
 
-        {loading && !itinerary && (
-          <div className="loading-container">
-            <div className="loading-circle"></div>
-            <p className="loading-text">{LOADING_STEPS[loadingStep]}</p>
-          </div>
-        )}
+      {loading && !itinerary && (
+        <div className="loading-state">
+          <div className="loading-ring" />
+          <p className="loading-label">{LOADING_STEPS[loadingStep]}</p>
+          <p className="loading-sub">Your itinerary is being crafted…</p>
+        </div>
+      )}
 
-        {itinerary && (
-          <div className="itinerary-results slide-in">
-            <h2 className="result-title">Your Itinerary</h2>
-
-            {/* Tab navigation */}
-            {tabs.length > 0 && (
-              <div className="day-tabs" role="tablist" aria-label="Itinerary sections">
-                {tabs.map((tab, index) => (
-                  <button
-                    type="button"
-                    key={tab.label}
-                    className={`day-tab ${activeDayIndex === index ? 'is-active' : ''}`}
-                    onClick={() => setActiveDayIndex(index)}
-                    role="tab"
-                    aria-selected={activeDayIndex === index}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Active section content */}
-            {tabs[activeDayIndex] && (
-              <section className="day-block" id={`day-${activeDayIndex}`}>
-                {/* ── Overview / Description ── */}
-                {tabs[activeDayIndex].type === 'overview' && (
-                  <>
-                    <div className="day-header is-static">
-                      <div>
-                        <h3>Trip Overview</h3>
-                        <p>Your journey at a glance</p>
-                      </div>
-                    </div>
-                    <div className="itinerary-description">
-                      <p>{parsed.description}</p>
-                    </div>
-                  </>
-                )}
-
-                {/* ── Day timeline ── */}
-                {tabs[activeDayIndex].type === 'day' && (() => {
-                  const day = tabs[activeDayIndex].data;
-                  return (
-                    <>
-                      <div className="day-header is-static">
-                        <div>
-                          <h3>Day {day.dayNumber} — {day.theme}</h3>
-                          <p>{day.date} &nbsp;·&nbsp; {day.items.length} stops</p>
-                        </div>
-                      </div>
-                      <div className="timeline">
-                        {day.items.map((item, i) => (
-                          <div key={i} className="timeline-item">
-                            <div className="timeline-time">{item.time}</div>
-                            <div className="timeline-dot" />
-                            <div className="timeline-activity">
-                              <span className="timeline-activity-name">{item.name}</span>
-                              {item.detail && (
-                                <span className="timeline-activity-detail">{item.detail}</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  );
-                })()}
-
-                {/* ── Travel & Accommodation ── */}
-                {tabs[activeDayIndex].type === 'travel' && (
-                  <>
-                    <div className="day-header is-static">
-                      <div>
-                        <h3>Travel &amp; Accommodation</h3>
-                        <p>Practical tips for your trip</p>
-                      </div>
-                    </div>
-                    <div className="travel-card">
-                      <ul className="travel-list">
-                        {parsed.travelItems.map((tip, i) => (
-                          <li key={i} className="travel-list-item">
-                            <span className="travel-bullet">✈</span>
-                            <span>{tip}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </>
-                )}
-              </section>
-            )}
-
+      {itinerary && (
+        <div className="itinerary-section slide-in">
+          <div className="itinerary-section-header">
+            <h2>Your Itinerary</h2>
             <div className="itinerary-actions">
-              <button onClick={handleGenerate} className="btn btn-secondary" disabled={loading}>
-                Regenerate Itinerary
+              <button onClick={handleGenerate} className="btn btn-secondary btn-sm" disabled={loading}>
+                ↺ Regenerate
               </button>
-              <button onClick={handleDownloadPdf} className="btn btn-secondary" disabled={loading}>
-                Download PDF
+              <button onClick={handleDownloadPdf} className="btn btn-secondary btn-sm" disabled={loading}>
+                ↓ PDF
               </button>
-              <button onClick={handleSave} className="btn btn-primary" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Itinerary'}
+              <button onClick={handleSave} className="btn btn-primary btn-sm" disabled={loading}>
+                {loading ? 'Saving…' : '✓ Save'}
               </button>
             </div>
           </div>
-        )}
-      </div>
+
+          {tabs.length > 0 && (
+            <div className="itin-tabs" role="tablist" aria-label="Itinerary sections">
+              {tabs.map((tab, index) => (
+                <button type="button" key={tab.label}
+                  className={`itin-tab${activeDayIndex === index ? ' is-active' : ''}`}
+                  onClick={() => setActiveDayIndex(index)}
+                  role="tab" aria-selected={activeDayIndex === index}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {tabs[activeDayIndex] && (
+            <div className="itin-content-card" id={`day-${activeDayIndex}`}>
+
+              {/* Overview */}
+              {tabs[activeDayIndex].type === 'overview' && (
+                <>
+                  <div className="itin-content-header">
+                    <h3>Trip Overview</h3>
+                    <p>Your journey at a glance</p>
+                  </div>
+                  <div className="itin-description">
+                    <p>{parsed.description}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Day timeline */}
+              {tabs[activeDayIndex].type === 'day' && (() => {
+                const day = tabs[activeDayIndex].data;
+                return (
+                  <>
+                    <div className="itin-content-header">
+                      <h3>Day {day.dayNumber} — {day.theme}</h3>
+                      <p>{day.date} · {day.items.length} stops</p>
+                    </div>
+                    <div className="itin-timeline">
+                      {day.items.map((item, i) => (
+                        <div key={i} className="itin-timeline-item">
+                          <div className="itin-timeline-time">{item.time}</div>
+                          <div className="itin-timeline-dot" />
+                          <div className="itin-timeline-body">
+                            <span className="itin-activity-name">{item.name}</span>
+                            {item.detail && <span className="itin-activity-detail">{item.detail}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Travel & Accommodation */}
+              {tabs[activeDayIndex].type === 'travel' && (
+                <>
+                  <div className="itin-content-header">
+                    <h3>Travel &amp; Accommodation</h3>
+                    <p>Practical tips for your trip</p>
+                  </div>
+                  <div className="itin-travel-body">
+                    <ul className="itin-travel-list">
+                      {parsed.travelItems.map((tip, i) => (
+                        <li key={i} className="itin-travel-item">
+                          <span className="itin-travel-bullet">✈</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

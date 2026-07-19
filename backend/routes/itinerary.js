@@ -33,7 +33,7 @@ router.post(
       .optional()
       .isIn(['hostel', 'hotel', 'resort', 'airbnb'])
       .withMessage('Invalid accommodation type'),
-    body('tripStyles').optional().isArray({ max: 2 }).withMessage('Trip styles must be an array of up to 2'),
+    body('tripStyles').optional().isArray({ max: 3 }).withMessage('Trip styles must be an array of up to 3'),
     body('mustSee').optional().isArray().withMessage('Must-see must be an array')
   ],
   async (req, res) => {
