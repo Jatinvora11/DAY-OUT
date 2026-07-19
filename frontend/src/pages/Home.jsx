@@ -37,92 +37,54 @@ const LOADING_STEPS = [
   'Finalizing itinerary'
 ];
 
-const parseItinerary = (text) => {
-  const lines = (text || '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .split('\n');
+const parseStructuredItinerary = (text) => {
+  const raw = (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-  const dayHeaderRegex = /^Day\s*(\d+)(?:\s*[:\-]|\s+)(.*)?$/i;
+  // ── Description ──────────────────────────────────────────────────────────
+  const descMatch = raw.match(/\[DESCRIPTION\]([\s\S]*?)\[\/DESCRIPTION\]/i);
+  const description = descMatch ? descMatch[1].trim() : '';
 
+  // ── Days ─────────────────────────────────────────────────────────────────
+  const dayRegex = /\[DAY\s+(\d+)\s*\|\s*([^|\]]+)\s*\|\s*([^\]]+)\]([\s\S]*?)\[\/DAY\]/gi;
   const days = [];
-  const introLines = [];
-  let currentDay = null;
+  let dayMatch;
+  while ((dayMatch = dayRegex.exec(raw)) !== null) {
+    const dayNumber = parseInt(dayMatch[1], 10);
+    const date = dayMatch[2].trim();
+    const theme = dayMatch[3].trim();
+    const body = dayMatch[4];
 
-  const stripNoise = (line) => line
-    .replace(/^\s*-{3,}\s*$/g, '')
-    .replace(/^\s*Day-by-Day Itinerary\s*:?.*$/i, '')
-    .replace(/---+/g, '')
-    .trim();
-
-  lines.forEach((rawLine) => {
-    const line = rawLine.trim();
-    if (/^[-–—]{3,}$/.test(line)) return;
-    if (/^Day-by-Day Itinerary\s*:?.*$/i.test(line)) return;
-
-    const dayMatch = line.match(dayHeaderRegex);
-    if (dayMatch) {
-      const dayNumber = dayMatch[1];
-      const dayTitle = dayMatch[2] ? dayMatch[2].trim() : '';
-      currentDay = {
-        title: dayTitle ? `Day ${dayNumber} - ${dayTitle}` : `Day ${dayNumber}`,
-        items: []
-      };
-      days.push(currentDay);
-      return;
-    }
-
-    if (!line) {
-      if (!currentDay) {
-        if (introLines.length > 0) introLines.push('');
-        return;
+    const activityRegex = /^(\d{1,2}:\d{2})\s*\|\s*(.+?)(?:\s+[\u2014\u2013]\s+(.+))?$/gm;
+    const items = [];
+    let actMatch;
+    while ((actMatch = activityRegex.exec(body)) !== null) {
+      const time = actMatch[1].trim();
+      const name = actMatch[2].trim();
+      // detail comes after an em-dash or en-dash WITH spaces on both sides
+      let detail = actMatch[3] ? actMatch[3].trim() : '';
+      // Also handle the case where Gemini puts the dash inline inside group 2
+      // Only split on em/en-dash surrounded by spaces to avoid splitting "Check-in" etc.
+      const emDashSplit = name.split(/\s+[\u2014\u2013]\s+/);
+      const activityName = emDashSplit[0].trim();
+      if (!detail && emDashSplit.length > 1) {
+        detail = emDashSplit.slice(1).join(' \u2014 ').trim();
       }
-      currentDay.items.push({ time: '', text: '' });
-      return;
+      items.push({ time, name: activityName, detail });
     }
-
-    if (!currentDay) {
-      introLines.push(line);
-      return;
-    }
-
-    const cleanedLine = stripNoise(line);
-    if (!cleanedLine) {
-      currentDay.items.push({ time: '', text: '' });
-      return;
-    }
-    currentDay.items.push({ time: '', text: cleanedLine });
-  });
-
-  const normalizedDays = days.map((day) => ({
-    ...day,
-    items: day.items
-  }));
-
-  const overviewText = introLines.join(' ');
-  const overviewItems = introLines.length > 0
-    ? introLines.filter((line) => !/^[-–—]{3,}$/.test(line)).map((line) => ({ text: line }))
-    : [];
-
-  const sections = [];
-  if (overviewItems.length > 0) {
-    sections.push({
-      title: 'Trip Overview',
-      type: 'overview',
-      summary: overviewText,
-      items: overviewItems
-    });
+    days.push({ dayNumber, date, theme, items });
   }
 
-  normalizedDays.forEach((day) => {
-    sections.push({
-      ...day,
-      type: 'day'
-    });
-  });
+  // ── Travel & Accommodation ────────────────────────────────────────────────
+  const taMatch = raw.match(/\[TRAVEL_AND_ACCOMMODATION\]([\s\S]*?)\[\/TRAVEL_AND_ACCOMMODATION\]/i);
+  const travelRaw = taMatch ? taMatch[1].trim() : '';
+  const travelItems = travelRaw
+    .split('\n')
+    .map((l) => l.replace(/^\s*[-•*]\s*/, '').trim())
+    .filter(Boolean);
 
-  return sections;
+  return { description, days, travelItems };
 };
+
 
 const Home = () => {
   const [formData, setFormData] = useState({
@@ -149,10 +111,20 @@ const Home = () => {
   const [success, setSuccess] = useState('');
   const [loadingStep, setLoadingStep] = useState(0);
 
-  const itineraryDays = useMemo(() => {
-    if (!itinerary?.itinerary) return [];
-    return parseItinerary(itinerary.itinerary);
+  const parsed = useMemo(() => {
+    if (!itinerary?.itinerary) return { description: '', days: [], travelItems: [] };
+    return parseStructuredItinerary(itinerary.itinerary);
   }, [itinerary]);
+
+  // Build flat tab list: [Overview (if desc), Day 1, Day 2, ..., Travel & Accommodation]
+  const tabs = useMemo(() => {
+    const list = [];
+    if (parsed.description) list.push({ type: 'overview', label: 'Overview' });
+    parsed.days.forEach((d) => list.push({ type: 'day', label: `Day ${d.dayNumber}`, data: d }));
+    if (parsed.travelItems.length > 0) list.push({ type: 'travel', label: 'Travel & Stay' });
+    return list;
+  }, [parsed]);
+
 
   useEffect(() => {
     if (!loading) return undefined;
@@ -164,18 +136,18 @@ const Home = () => {
   }, [loading]);
 
   useEffect(() => {
-    if (!itineraryDays.length) return;
+    if (!tabs.length) return;
     setActiveDayIndex(0);
     setCollapsedDays({});
-  }, [itineraryDays.length]);
+  }, [tabs.length]);
 
   useEffect(() => {
-    if (!itineraryDays.length) return;
+    if (!tabs.length) return;
     const target = document.getElementById(`day-${activeDayIndex}`);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [activeDayIndex, itineraryDays.length]);
+  }, [activeDayIndex, tabs.length]);
 
   const handleChange = (e) => {
     setFormData({
@@ -300,7 +272,15 @@ const Home = () => {
         { label: 'Must-See', value: formData.mustSee.join(', ') || 'None' }
       ],
       lines: itinerary.itinerary.split('\n'),
-      sections: itineraryDays
+      sections: tabs
+        .filter((t) => t.type === 'day')
+        .map((t) => ({
+          title: `Day ${t.data.dayNumber} — ${t.data.theme}`,
+          items: t.data.items.map((item) => ({
+            time: item.time,
+            text: item.detail ? `${item.name} — ${item.detail}` : item.name
+          }))
+        }))
     });
   };
 
@@ -658,52 +638,96 @@ const Home = () => {
         {itinerary && (
           <div className="itinerary-results slide-in">
             <h2 className="result-title">Your Itinerary</h2>
-            {itineraryDays.length > 0 && (
-              <div className="day-tabs" role="tablist" aria-label="Overview and day navigation">
-                {itineraryDays.map((day, index) => {
-                  const dayNumber = itineraryDays
-                    .slice(0, index + 1)
-                    .filter((section) => section.type === 'day')
-                    .length;
-                  return (
+
+            {/* Tab navigation */}
+            {tabs.length > 0 && (
+              <div className="day-tabs" role="tablist" aria-label="Itinerary sections">
+                {tabs.map((tab, index) => (
                   <button
                     type="button"
-                    key={day.title}
+                    key={tab.label}
                     className={`day-tab ${activeDayIndex === index ? 'is-active' : ''}`}
                     onClick={() => setActiveDayIndex(index)}
                     role="tab"
                     aria-selected={activeDayIndex === index}
                   >
-                    {day.type === 'overview' ? 'Overview' : `Day ${dayNumber}`}
+                    {tab.label}
                   </button>
-                  );
-                })}
+                ))}
               </div>
             )}
 
-            {itineraryDays[activeDayIndex] && (
+            {/* Active section content */}
+            {tabs[activeDayIndex] && (
               <section className="day-block" id={`day-${activeDayIndex}`}>
-                <div className="day-header is-static">
-                  <div>
-                    <h3>{itineraryDays[activeDayIndex].title}</h3>
-                    <p>
-                      {itineraryDays[activeDayIndex].type === 'overview'
-                        ? `${itineraryDays[activeDayIndex].items.length} highlights`
-                        : `${itineraryDays[activeDayIndex].items.length} stops`}
-                    </p>
-                  </div>
-                </div>
+                {/* ── Overview / Description ── */}
+                {tabs[activeDayIndex].type === 'overview' && (
+                  <>
+                    <div className="day-header is-static">
+                      <div>
+                        <h3>Trip Overview</h3>
+                        <p>Your journey at a glance</p>
+                      </div>
+                    </div>
+                    <div className="itinerary-description">
+                      <p>{parsed.description}</p>
+                    </div>
+                  </>
+                )}
 
-                <div className="overview-block">
-                  <p>
-                    {itineraryDays[activeDayIndex].items
-                      .map((item) => item.text)
-                      .join('\n')}
-                  </p>
-                </div>
+                {/* ── Day timeline ── */}
+                {tabs[activeDayIndex].type === 'day' && (() => {
+                  const day = tabs[activeDayIndex].data;
+                  return (
+                    <>
+                      <div className="day-header is-static">
+                        <div>
+                          <h3>Day {day.dayNumber} — {day.theme}</h3>
+                          <p>{day.date} &nbsp;·&nbsp; {day.items.length} stops</p>
+                        </div>
+                      </div>
+                      <div className="timeline">
+                        {day.items.map((item, i) => (
+                          <div key={i} className="timeline-item">
+                            <div className="timeline-time">{item.time}</div>
+                            <div className="timeline-dot" />
+                            <div className="timeline-activity">
+                              <span className="timeline-activity-name">{item.name}</span>
+                              {item.detail && (
+                                <span className="timeline-activity-detail">{item.detail}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  );
+                })()}
+
+                {/* ── Travel & Accommodation ── */}
+                {tabs[activeDayIndex].type === 'travel' && (
+                  <>
+                    <div className="day-header is-static">
+                      <div>
+                        <h3>Travel &amp; Accommodation</h3>
+                        <p>Practical tips for your trip</p>
+                      </div>
+                    </div>
+                    <div className="travel-card">
+                      <ul className="travel-list">
+                        {parsed.travelItems.map((tip, i) => (
+                          <li key={i} className="travel-list-item">
+                            <span className="travel-bullet">✈</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
               </section>
             )}
-            
+
             <div className="itinerary-actions">
               <button onClick={handleGenerate} className="btn btn-secondary" disabled={loading}>
                 Regenerate Itinerary

@@ -322,6 +322,134 @@
   color: var(--accent-2);
 }
 
+/* ── Description card ─────────────────────────────────────────────────────── */
+.itinerary-description {
+  padding: 24px 28px;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.itinerary-description p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* ── Timeline ─────────────────────────────────────────────────────────────── */
+.timeline {
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 60px 20px 1fr;
+  align-items: flex-start;
+  gap: 0 14px;
+  position: relative;
+  padding-bottom: 28px;
+}
+
+/* Vertical line connecting dots */
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(60px + 14px + 9px); /* time-col + gap + half of dot */
+  top: 20px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), var(--accent-2));
+  opacity: 0.3;
+}
+
+.timeline-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+  padding-top: 2px;
+  letter-spacing: 0.03em;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px color-mix(in srgb, var(--accent) 30%, transparent);
+  margin-top: 3px;
+  flex-shrink: 0;
+  justify-self: center;
+}
+
+.timeline-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.timeline-activity-name {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.timeline-activity-detail {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── Travel & Accommodation card ─────────────────────────────────────────── */
+.travel-card {
+  padding: 20px 28px 28px;
+}
+
+.travel-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.travel-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface-alt);
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.travel-list-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.travel-bullet {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Legacy overview-block (kept for any non-structured fallback) ─────────── */
 .overview-block {
   padding: 20px 24px 26px;
   display: grid;
@@ -379,5 +507,22 @@
 
   .itinerary-actions button {
     width: 100%;
+  }
+
+  .timeline-item {
+    grid-template-columns: 48px 16px 1fr;
+    gap: 0 10px;
+  }
+
+  .timeline-item:not(:last-child)::after {
+    left: calc(48px + 10px + 7px);
+  }
+
+  .timeline-time {
+    font-size: 0.75rem;
+  }
+
+  .travel-list-item {
+    padding: 12px 14px;
   }
 }

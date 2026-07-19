@@ -7,18 +7,9 @@ import Itinerary from '../models/Itinerary.js';
 
 const router = express.Router();
 
-const cleanGeminiText = (text) => {
+const normalizeLineEndings = (text) => {
   if (!text) return '';
-  let cleaned = text;
-
-  cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
-  cleaned = cleaned.replace(/^[ \t]*#{1,6}[ \t]*/gm, '');
-  cleaned = cleaned.replace(/^[-*+][ \t]+/gm, '');
-  cleaned = cleaned.replace(/^[ \t]*\d+[.)][ \t]+/gm, '');
-  cleaned = cleaned.replace(/[*_~`]+/g, '');
-  cleaned = cleaned.replace(/\r\n/g, '\n');
-  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
-  return cleaned.trim();
+  return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,18 +59,77 @@ router.post(
     } = req.body;
 
     let reservation = null;
+
+    // ── Build structured prompt ──────────────────────────────────────────────
     const budgetLabel = budgetType === 'per_person' ? 'per person' : 'overall';
-    const paceText = travelPace ? `Travel pace: ${travelPace}.` : '';
-    const stayText = accommodationType ? `Preferred accommodation: ${accommodationType}.` : '';
+    const totalDays = Math.max(
+      1,
+      Math.round(
+        (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
+      ) + 1
+    );
+    const paceDescriptions = {
+      relaxed: 'a relaxed pace with generous rest time between activities (3-4 activities per day)',
+      moderate: 'a moderate pace balancing sightseeing with leisure (4-5 activities per day)',
+      packed: 'a packed schedule maximising every hour (6-7 activities per day)'
+    };
+    const paceDetail = paceDescriptions[travelPace] || paceDescriptions.moderate;
     const stylesText = Array.isArray(tripStyles) && tripStyles.length > 0
-      ? `Trip styles: ${tripStyles.join(', ')}.`
-      : tripType
-        ? `Trip style: ${tripType}.`
-        : '';
+      ? tripStyles.join(' and ')
+      : tripType || 'general leisure';
     const mustSeeText = Array.isArray(mustSee) && mustSee.length > 0
-      ? `Must-see attractions: ${mustSee.join(', ')}.`
+      ? `You MUST include the following attractions somewhere in the itinerary: ${mustSee.join(', ')}.`
       : '';
-    const prompt = `Create a detailed itinerary for ${location} from ${startDate} to ${endDate} for ${adults} adults and ${children} children with a ${budgetLabel} budget of ${budget} INR. ${paceText} ${stayText} ${stylesText} ${mustSeeText} Special requests: ${specialRequests || 'None'}. Please provide day-by-day activities with time slots, recommended places to visit, estimated costs, and travel tips.`;
+    const specialText = specialRequests ? `Special requests: ${specialRequests}.` : '';
+    const childrenText = Number(children) > 0
+      ? `${children} ${Number(children) === 1 ? 'child' : 'children'} (keep activities family-friendly where appropriate)`
+      : 'no children';
+
+    const prompt = `You are an expert travel planner. Create a complete, day-by-day travel itinerary using ONLY the structured format described below. Do NOT add any commentary, preamble, or text outside the tags.
+
+Trip details (use these to inform your plan — do NOT copy them verbatim into the output):
+- Destination: ${location}
+- Dates: ${startDate} to ${endDate} (${totalDays} day${totalDays > 1 ? 's' : ''})
+- Travelers: ${adults} adult${Number(adults) > 1 ? 's' : ''}, ${childrenText}
+- Budget: ₹${budget} ${budgetLabel}
+- Preferred accommodation: ${accommodationType || 'hotel'}
+- Travel style: ${stylesText}
+- Pace: ${paceDetail}
+${mustSeeText}
+${specialText}
+
+OUTPUT FORMAT — follow this EXACTLY:
+
+[DESCRIPTION]
+Write 2-3 engaging sentences that set the scene and tone for the trip. Make it inspiring and specific to the destination and travel style. Do NOT mention specific numbers like budget amount, number of adults, or raw preference labels.
+[/DESCRIPTION]
+
+For each of the ${totalDays} days, write a block in this format:
+
+[DAY <n> | <YYYY-MM-DD> | <Short evocative theme for the day, 3-6 words>]
+HH:MM | <Place or Activity Name> — <One sentence describing what to do or see there>
+HH:MM | <Place or Activity Name> — <One sentence describing what to do or see there>
+(continue for all activities that day)
+[/DAY]
+
+After all days, write:
+
+[TRAVEL_AND_ACCOMMODATION]
+- <Tip about getting to the destination (flights, trains, etc.) with realistic options>
+- <Tip about local transport at the destination>
+- <Specific accommodation recommendation matching the ₹${budget} ${budgetLabel} budget and preferred type (${accommodationType || 'hotel'})>
+- <Best area or neighborhood to stay in and why>
+- <One additional practical travel tip (best time to visit local attractions, booking advice, local customs, etc.)>
+[/TRAVEL_AND_ACCOMMODATION]
+
+IMPORTANT RULES:
+1. Use 24-hour HH:MM time format (e.g., 09:00, 13:30, 20:00).
+2. Activities must be realistic for the date, local opening hours, and the traveler's pace.
+3. Include meal stops (breakfast, lunch, dinner) as activities with a suggested restaurant or food type.
+4. Do NOT echo or repeat the raw trip details the user provided.
+5. Do NOT add any text, headers, or markdown outside the tags above.
+6. Start the very first character with [DESCRIPTION].`;
+    // ────────────────────────────────────────────────────────────────────────
     const estimatedTokens = estimateTokensFromText(prompt);
 
     try {
@@ -124,7 +174,7 @@ router.post(
             const model = genAI.getGenerativeModel({ model: modelName });
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            itineraryText = cleanGeminiText(response.text());
+            itineraryText = normalizeLineEndings(response.text());
             break;
           } catch (error) {
             lastError = error;
