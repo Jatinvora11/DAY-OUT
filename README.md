@@ -4,21 +4,20 @@ DayOut is an AI-powered travel itinerary planner that turns a few trip details i
 
 ## Project Summary
 
-* Built a full-stack AI travel planner where users input destination, dates, and budget to receive a Gemini-generated day-by-day itinerary; deployed frontend on Vercel, backend on Render.
-* Designed a custom token-aware rate limiter in MongoDB tracking requests and token usage per-user and globally across minute/day windows — preventing API cost overruns without third-party libraries.
-* Implemented role-based access control (user/admin), JWT authentication, admin dashboard with live usage analytics, and a multi-theme UI (4 palettes × light/dark mode) with React + Vite.
+Built a full-stack AI travel planner where users input destination, dates, and budget to receive a Gemini-generated day-by-day itinerary. The system utilizes a custom token-aware rate limiter in MongoDB tracking requests and token usage per-user and globally across minute/day windows — preventing API cost overruns without third-party libraries. It features robust role-based access control (user/admin), JWT authentication, an admin dashboard with live usage analytics, and a modernized, responsive interface featuring robust light and dark modes built with React + Vite.
 
 ## Features
 
 - AI-powered itinerary generation with Google Gemini
-- Secure user authentication with JWT
+- Secure user authentication with JWT and role-based access (user/admin)
 - Save, manage, and revisit itineraries anytime
-- Responsive, mobile-first UI
+- Fully modernized, responsive UI
 - Worldwide destination coverage
 - Budget-conscious recommendations with budget type selection
-- Modern UI with smooth animations and theming
-- Visual themes: Coastal, Forest, Sunset, and a dedicated dark-only Night Sky mode
-- Download itineraries as PDF
+- Refined typography, sleek layout structures, and smooth micro-interactions
+- Built-in dynamic Light and Dark mode support
+- Download itineraries as PDF for offline use
+- Intelligent rendering of complex AI-generated itinerary data
 
 ## Why I Built This
 
@@ -27,24 +26,16 @@ Trip planning is time-consuming and usually starts from scratch. I built DayOut 
 - Reduce the time it takes to plan a trip
 - Offer budget-aware, structured itineraries
 - Keep itineraries saved and easy to revisit
-- Provide a clean, responsive UI with admin oversight and usage visibility
+- Provide a clean, premium, and responsive UI with admin oversight and usage visibility
 
 ## What You Can Do
 
-- Generate itineraries with AI
+- Generate tailored, multi-day itineraries with AI
 - Choose budget type and trip preferences
-- Save, view, and delete itineraries
-- Download itineraries as PDF
+- Save, view, and delete itineraries from your profile
+- Download itineraries beautifully formatted as PDF
 - Manage your profile (update info, change password, delete account)
-- Access an admin dashboard for users and usage stats
-- Preview themes from profile swatches, save your selection, toggle light/dark mode, and use the server-down fallback screen
-
-## Key Features
-
-- AI itinerary generation with rate limiting (global + per-user)
-- JWT authentication with role-based access (user/admin)
-- MongoDB Atlas storage for users and itineraries
-- Vercel frontend + Render backend deployment
+- Toggle seamlessly between Light and Dark mode
 
 ## Tech Stack
 
@@ -52,80 +43,12 @@ Trip planning is time-consuming and usually starts from scratch. I built DayOut 
 - React 18 + Vite
 - React Router DOM
 - Axios
-- CSS theming with per-theme radial mesh hero gradients
+- Custom CSS with built-in Light/Dark mode theming and smooth transitions
+- jsPDF for client-side PDF generation
 
 ### Backend
 - Node.js + Express
 - MongoDB Atlas + Mongoose
 - JWT + Bcryptjs
-- Gemini API
+- Google Gemini API
 - Express Validator
-
-## API Endpoints (Summary)
-
-### Auth
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-
-### User
-- `GET /api/user/profile`
-- `PUT /api/user/profile`
-- `PUT /api/user/change-password`
-- `DELETE /api/user`
-
-### Itinerary
-- `POST /api/itinerary/generate`
-- `POST /api/itinerary/save`
-- `GET /api/itinerary/user`
-- `GET /api/itinerary/:id`
-- `DELETE /api/itinerary/:id`
-
-### Admin
-- `GET /api/admin/users`
-- `GET /api/admin/users/:id`
-- `PATCH /api/admin/users/:id/role`
-- `GET /api/admin/usage/global`
-- `GET /api/admin/usage/users`
-
-## Deployment
-
-- Frontend: Vercel
-- Backend: Render
-- Database: MongoDB Atlas
-
-### Vercel (Frontend)
-- Set `VITE_API_URL` to your Render API base (e.g., `https://your-backend.onrender.com/api`).
-- Ensure SPA refresh works with [frontend/vercel.json](frontend/vercel.json).
-
-### Render (Backend)
-- Set env vars: `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `ADMIN_REGISTER_CODE`, rate-limit values.
-- Start command: `npm start`.
-
-### MongoDB Atlas
-- Create a cluster and user.
-- Use the connection string for `MONGODB_URI`.
-
-## Project Structure
-
-```
-DayOut/
-├── backend/
-│   ├── config/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── .env.example
-│   ├── package.json
-│   └── server.js
-└── frontend/
-    ├── src/
-    ├── .env.example
-    ├── package.json
-    ├── vercel.json
-    └── vite.config.js
-```
-
-## Notes
-
-- Rotating `JWT_SECRET` will log users out.
-- The Contact page is informational; API endpoints remain available.
