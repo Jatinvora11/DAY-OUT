@@ -372,18 +372,7 @@ img, video {
   transform: translateY(-1px);
 }
 
-/* Dark / filled navy */
-.btn-dark {
-  background: var(--accent-dark);
-  color: #fff;
-  box-shadow: var(--shadow-sm);
-}
 
-.btn-dark:hover:not(:disabled) {
-  opacity: 0.88;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
 
 /* Danger */
 .btn-danger {
@@ -401,7 +390,6 @@ img, video {
 .btn-sm   { padding: 6px 14px; font-size: 0.8125rem; border-radius: var(--radius-sm); }
 .btn-lg   { padding: 14px 32px; font-size: 1.0625rem; border-radius: var(--radius-lg); }
 .btn-full { width: 100%; }
-.btn-compact { padding: 7px 14px; font-size: 0.875rem; }
 
 /* Legacy alias kept for compatibility */
 .btn-delete {
@@ -577,42 +565,7 @@ input[type='date'] {
   border-color: var(--info-border);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   CARDS
-───────────────────────────────────────────────────────────────────────────── */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-}
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   BADGES
-───────────────────────────────────────────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.badge-accent {
-  background: var(--accent-light);
-  color: var(--accent);
-}
-
-.badge-dark {
-  background: var(--accent-dark-light);
-  color: var(--accent-dark);
-}
-
-[data-theme='dark'] .badge-dark {
-  color: var(--accent);
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SPINNER / LOADING
@@ -655,14 +608,7 @@ input[type='date'] {
   max-width: 560px;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   DIVIDER
-───────────────────────────────────────────────────────────────────────────── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: var(--sp-6) 0;
-}
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MAIN CONTENT OFFSET (header height)

@@ -1,6 +1,6 @@
 .footer {
   background: var(--accent-dark);
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   margin-top: auto;
 }
 
@@ -35,7 +35,9 @@
   color: var(--accent);
 }
 
-[data-theme='dark'] .footer-logo-icon { color: var(--accent); }
+[data-theme='dark'] .footer-logo-icon {
+  color: var(--accent);
+}
 
 .footer-logo-text {
   font-family: var(--font-display);
@@ -45,16 +47,20 @@
   letter-spacing: -0.02em;
 }
 
-[data-theme='dark'] .footer-logo-text { color: var(--text); }
+[data-theme='dark'] .footer-logo-text {
+  color: var(--text);
+}
 
 .footer-tagline {
   font-size: 0.9rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.6);
   max-width: 280px;
 }
 
-[data-theme='dark'] .footer-tagline { color: var(--text-3); }
+[data-theme='dark'] .footer-tagline {
+  color: var(--text-3);
+}
 
 /* Link columns */
 .footer-links {
@@ -67,11 +73,13 @@
   font-weight: 700;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
   margin-bottom: var(--sp-4);
 }
 
-[data-theme='dark'] .footer-col h4 { color: var(--text-3); }
+[data-theme='dark'] .footer-col h4 {
+  color: var(--text-3);
+}
 
 .footer-col ul {
   list-style: none;
@@ -82,18 +90,22 @@
 
 .footer-col ul a {
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.72);
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
-[data-theme='dark'] .footer-col ul a { color: var(--text-2); }
+[data-theme='dark'] .footer-col ul a {
+  color: var(--text-2);
+}
 
-.footer-col ul a:hover { color: var(--accent); }
+.footer-col ul a:hover {
+  color: var(--accent);
+}
 
 /* Bottom bar */
 .footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.10);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--sp-5) var(--sp-5);
@@ -110,11 +122,13 @@
 .footer-copy,
 .footer-powered {
   font-size: 0.83rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 [data-theme='dark'] .footer-copy,
-[data-theme='dark'] .footer-powered { color: var(--text-3); }
+[data-theme='dark'] .footer-powered {
+  color: var(--text-3);
+}
 
 /* Responsive */
 @media (max-width: 900px) {

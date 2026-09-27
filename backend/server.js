@@ -1,102 +1,81 @@
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables FIRST, before other imports
-dotenv.config({ path: join(__dirname, '.env') });
-
-
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import cron from 'node-cron';
+
 import connectDB from './config/db.js';
-import RateLimitUsage from './models/RateLimitUsage.js';
+import scheduleRateLimitCleanup from './jobs/rateLimitCleanup.js';
+
 import authRoutes from './routes/auth.js';
 import itineraryRoutes from './routes/itinerary.js';
 import contactRoutes from './routes/contact.js';
 import userRoutes from './routes/user.js';
 import adminRoutes from './routes/admin.js';
 
+// ─── Database ────────────────────────────────────────────────────────────────
+await connectDB();
+
+// ─── Background jobs ─────────────────────────────────────────────────────────
+scheduleRateLimitCleanup();
+
+// ─── App setup ───────────────────────────────────────────────────────────────
 const app = express();
 
-// Connect to MongoDB
-connectDB();
-
-// Cleanup old rate limit usage records every hour
-cron.schedule('0 * * * *', async () => {
-  try {
-    const cutoff = new Date(Date.now() - 25 * 60 * 60 * 1000);
-    const result = await RateLimitUsage.deleteMany({ windowStart: { $lt: cutoff } });
-    console.log(`Rate limit cleanup removed ${result.deletedCount} records`);
-  } catch (error) {
-    console.error('Rate limit cleanup failed:', error.message);
-  }
-});
-
-// Middleware
+// CORS
 if (!process.env.FRONTEND_URL) {
-  console.warn('⚠️  FRONTEND_URL is not set — defaulting to http://localhost:5173. Set this env var in production!');
+  console.warn('⚠️  FRONTEND_URL is not set — defaulting to http://localhost:5173');
 }
 
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
-  .map((origin) => origin.trim())
+  .map((o) => o.trim())
   .filter(Boolean);
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 
-const apiLimiter = rateLimit({
+// Global rate limiter (brute-force protection on all routes)
+const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Too many requests, please try again later' }
+  message: { message: 'Too many requests, please try again later' },
 });
 
 app.use(helmet());
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
-app.use(apiLimiter);
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  }),
+);
+app.use(globalLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/itinerary', itineraryRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ message: 'DayOut API is running' });
-});
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'DayOut API' }));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
+// ─── Global error handler ────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
   console.error(err.stack);
   res.status(500).json({
     message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    ...(process.env.NODE_ENV === 'development' && { error: err.message }),
   });
 });
 
+// ─── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

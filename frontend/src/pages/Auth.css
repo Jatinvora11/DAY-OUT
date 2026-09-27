@@ -173,14 +173,7 @@
   box-shadow: var(--shadow-xs);
 }
 
-.role-tabs {
-  display: flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 4px;
-}
+
 
 /* Submit button */
 .btn-full {

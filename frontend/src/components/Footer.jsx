@@ -46,7 +46,6 @@ const Footer = () => (
       <p className="footer-copy">
         © {new Date().getFullYear()} DayOut. All rights reserved.
       </p>
-      <p className="footer-powered">Powered by AI</p>
     </div>
   </footer>
 );

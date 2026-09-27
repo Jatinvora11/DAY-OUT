@@ -170,12 +170,7 @@
 
 .profile-danger-text { font-size: 0.9rem; color: var(--text-3); margin-bottom: var(--sp-4); }
 
-/* Loading / error */
-.profile-loading {
-  text-align: center;
-  padding: var(--sp-12) var(--sp-5);
-  color: var(--text-3);
-}
+
 
 /* Responsive */
 @media (max-width: 860px) {

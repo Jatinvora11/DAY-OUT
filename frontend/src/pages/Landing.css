@@ -226,10 +226,6 @@
   margin-bottom: var(--sp-12);
 }
 
-.features-header .section-subtitle {
-  margin: 0 auto;
-}
-
 .features-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

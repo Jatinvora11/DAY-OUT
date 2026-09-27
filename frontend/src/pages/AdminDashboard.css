@@ -363,8 +363,8 @@
   color: var(--badge-user-text);
 }
 
+
 /* Detail panel */
-.admin-detail-section {}
 
 .admin-detail-grid {
   display: grid;
